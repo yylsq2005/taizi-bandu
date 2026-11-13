@@ -10,6 +10,8 @@ vi.mock('../../src/api/client', () => ({
     getPost: vi.fn(),
     createPost: vi.fn(),
     updatePost: vi.fn(),
+    likePost: vi.fn(),
+    favoritePost: vi.fn(),
     deletePost: vi.fn(),
   },
 }))
@@ -28,6 +30,8 @@ function fixture(id: string, overrides: Partial<Post> = {}): Post {
     createdAt: 100,
     likes: 0,
     liked: false,
+    favorites: 0,
+    favorited: false,
     hue: 340,
     ...overrides,
   }
@@ -35,7 +39,13 @@ function fixture(id: string, overrides: Partial<Post> = {}): Post {
 
 const SEEDS: Post[] = [
   fixture('newest', { createdAt: 300, likes: 12, content: '梧桐叶黄了 #今日片语' }),
-  fixture('middle', { createdAt: 200, likes: 8, content: '读完一本书 #读书笔记' }),
+  fixture('middle', {
+    createdAt: 200,
+    likes: 8,
+    content: '读完一本书 #读书笔记',
+    favorited: true,
+    favorites: 4,
+  }),
   fixture('oldest', { createdAt: 100, likes: 21, content: '地铁见闻 #通勤路上' }),
 ]
 
@@ -96,6 +106,29 @@ describe('FeedView：筛选与卡片事件', () => {
     await wrapper.vm.$nextTick()
     const ids = wrapper.findAll('.timeline .post').map((c) => c.attributes('data-id'))
     expect(ids[0]).toBe(store.posts[1].id)
+  })
+
+  it('点击「收藏」tab 只显示已收藏，文案为「收藏 N 条」', async () => {
+    const { wrapper, store } = await mountView()
+    const favTab = wrapper.find('[data-filter="favorites"]')
+    await favTab.trigger('click')
+    expect(store.filter).toBe('favorites')
+    expect(favTab.classes()).toContain('is-active')
+    const ids = wrapper.findAll('.timeline .post').map((c) => c.attributes('data-id'))
+    expect(ids).toEqual(['middle'])
+    expect(wrapper.find('.feedbar__count').text()).toBe('收藏 1 条')
+  })
+
+  it('卡片收藏事件直接委派给 store.toggleFavorite', async () => {
+    const { wrapper, store } = await mountView()
+    const favoriteSpy = vi.spyOn(store, 'toggleFavorite').mockResolvedValue(undefined)
+    const firstCard = wrapper.findAll('.timeline .post')[0]
+    const id = firstCard.attributes('data-id')!
+
+    await firstCard.find('[data-action="favorite"]').trigger('click')
+
+    expect(favoriteSpy).toHaveBeenCalledWith(id)
+    expect(wrapper.emitted('favorite')).toBeUndefined()
   })
 
   it('卡片事件向上转发：like/view/copy/tag', async () => {

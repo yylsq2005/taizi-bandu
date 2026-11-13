@@ -23,6 +23,9 @@ const store = useFeedStore()
         <div>
           <b>{{ store.totalLikes }}</b><span>被赞</span>
         </div>
+        <div>
+          <b>{{ store.favoriteCount }}</b><span>收藏</span>
+        </div>
       </div>
     </section>
 
@@ -49,6 +52,16 @@ const store = useFeedStore()
           </svg>
         </span>
         热门
+      </button>
+      <button type="button" class="navitem" :class="{ 'is-active': store.filter === 'favorites' }"
+              data-filter="favorites" @click="$emit('filter', 'favorites')">
+        <span class="navitem__icon" style="--h: 42">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9"
+               stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3.6l2.5 5.3 5.7.8-4.1 4 1 5.7-5.1-2.8-5.1 2.8 1-5.7-4.1-4 5.7-.8L12 3.6Z" />
+          </svg>
+        </span>
+        收藏
       </button>
       <button type="button" class="navitem" data-nav="write" @click="$emit('write')">
         <span class="navitem__icon" style="--h: 160">

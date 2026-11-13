@@ -8,6 +8,7 @@ const props = defineProps<{ post: Post | null }>()
 defineEmits<{
   close: []
   like: []
+  favorite: []
   copy: []
   delete: []
 }>()
@@ -18,6 +19,10 @@ const meta = computed(() => (props.post ? `${formatRelativeTime(props.post.creat
 const likeLabel = computed(() => {
   if (!props.post) return '点赞'
   return props.post.liked ? `已赞 ${props.post.likes}` : `点赞 ${props.post.likes || ''}`.trim()
+})
+const favoriteLabel = computed(() => {
+  if (!props.post) return '收藏'
+  return props.post.favorited ? `已收藏 ${props.post.favorites}` : `收藏 ${props.post.favorites}`
 })
 </script>
 
@@ -57,6 +62,9 @@ const likeLabel = computed(() => {
             <b>{{ post.likes }}</b><span>获赞</span>
           </div>
           <div>
+            <b>{{ post.favorites }}</b><span>收藏</span>
+          </div>
+          <div>
             <b>{{ formatDate(post.createdAt) }}</b><span>发布</span>
           </div>
         </div>
@@ -70,6 +78,16 @@ const likeLabel = computed(() => {
               <path d="M12 20s-7-4.4-7-9.2A4.2 4.2 0 0 1 12 7.6a4.2 4.2 0 0 1 7 3.2C19 15.6 12 20 12 20Z" />
             </svg>
             <span>{{ likeLabel }}</span>
+          </button>
+
+          <button type="button" class="btn3d btn3d--sm" :class="{ 'btn3d--ghost': !post.favorited }"
+                  data-detail-action="favorite" style="--h: 42" :aria-pressed="post.favorited"
+                  @click="$emit('favorite')">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3.6l2.5 5.3 5.7.8-4.1 4 1 5.7-5.1-2.8-5.1 2.8 1-5.7-4.1-4 5.7-.8L12 3.6Z" />
+            </svg>
+            <span>{{ favoriteLabel }}</span>
           </button>
 
           <button type="button" class="btn3d btn3d--sm btn3d--ghost" data-detail-action="copy"
