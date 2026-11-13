@@ -32,3 +32,7 @@ build/
 .env
 .env.local
 .env.*.local
+
+# ---- 本地工具与截图工位 ----
+.codebuddy/
+.shots/

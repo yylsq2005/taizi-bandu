@@ -3,65 +3,55 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#F7F8FA" />
-  <meta name="description" content="太子伴读 —— 一个安静的书写角落，写下此刻的一点点。" />
-  <title>太子伴读 · 写下此刻的一点点</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%233B5BFE'/%3E%3Cpath d='M19 4.2c-4.4.3-8.6 2.4-10.8 5.1-1.3 1.6-2 3.6-2.3 5.6-.1.7.5 1.2 1.2 1 2.1-.5 4.2-1.3 5.8-2.7C15.6 11 17.9 7.4 19 4.2Z' fill='%23fff'/%3E%3C/svg%3E" />
+  <meta name="theme-color" content="#F7F4FF" />
+  <meta name="description" content="太子伴读 —— 把此刻的一点点，写在五彩的广场上。" />
+  <title>太子伴读 · 五彩片语广场</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF3D8B'/%3E%3Cstop offset='.5' stop-color='%23A855F7'/%3E%3Cstop offset='1' stop-color='%2322D3EE'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='24' height='24' rx='7' fill='url(%23g)'/%3E%3Cpath d='M18.6 4.6c-3.9.4-7.3 2.1-9.1 4.4-1.2 1.6-1.8 3.5-2 5.2-.1.6.4 1 1 1 1.8-.2 3.7-.9 5.1-2.1 2.1-1.8 4-4.9 5-8.5Z' fill='%23fff'/%3E%3C/svg%3E" />
 
   <style>
     /* ==================================================================
-       1. 设计令牌（Design Tokens）
-       —— 颜色 / 圆角 / 阴影 / 动效曲线集中在此，全站统一引用
+       1. 设计令牌：一套多色相霓虹色板
        ================================================================== */
     :root {
-      /* 主色 */
-      --primary: #3B5BFE;
-      --primary-strong: #2647D8;
-      --primary-soft: #EEF1FF;
+      --ink: #121324;
+      --ink-2: #3A3F55;
+      --ink-3: #858BA3;
+      --line: rgba(18, 19, 36, .07);
+      --surface: rgba(255, 255, 255, .88);
 
-      /* 背景与表面 */
-      --bg: #F7F8FA;
-      --surface: #FFFFFF;
-      --surface-alt: #F2F4F8;
+      --pink: 340;
+      --violet: 268;
+      --blue: 225;
+      --cyan: 190;
+      --mint: 158;
+      --amber: 35;
 
-      /* 文字 */
-      --text: #0F172A;
-      --text-muted: #475569;
-      --text-faint: #94A3B8;
-
-      /* 功能色 */
-      --danger: #EF4444;
-      --warn: #F59E0B;
-      --success: #10B981;
-      --border: #E5E8EF;
-
-      /* 形状 */
-      --radius-lg: 16px;
-      --radius-md: 12px;
+      --radius-xl: 24px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
       --radius-pill: 999px;
 
-      /* 阴影（柔和、低对比） */
-      --shadow-card: 0 1px 2px rgba(15, 23, 42, .04), 0 10px 28px -18px rgba(15, 23, 42, .28);
-      --shadow-card-hover: 0 2px 6px rgba(15, 23, 42, .05), 0 18px 36px -20px rgba(15, 23, 42, .34);
+      --shadow-card:
+        0 1px 2px rgba(18, 19, 36, .04),
+        0 18px 42px -32px rgba(52, 30, 120, .42);
+      --shadow-lift:
+        0 2px 8px rgba(18, 19, 36, .05),
+        0 30px 60px -34px rgba(88, 52, 190, .48);
+      --shadow-float: 0 30px 80px -28px rgba(30, 20, 70, .5);
 
-      /* 动效 */
       --ease: cubic-bezier(.22, 1, .36, 1);
-      --dur-fast: 160ms;
-      --dur-base: 220ms;
+      --dur: 220ms;
 
-      /* 字体：系统字体栈，零外部依赖 */
       --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
                    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
     }
 
     /* ==================================================================
-       2. 基础重置与页面骨架
+       2. 基础重置
        ================================================================== */
-    *,
-    *::before,
-    *::after { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; }
 
-    html { -webkit-text-size-adjust: 100%; }
+    html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 
     body {
       margin: 0;
@@ -69,29 +59,25 @@
       font-family: var(--font-sans);
       font-size: 15px;
       line-height: 1.7;
-      color: var(--text);
-      background-color: var(--bg);
-      /* 顶部一层极淡的主色光晕，让浅色背景不至于平铺乏味 */
-      background-image: radial-gradient(760px 320px at 50% -140px, #E9EDFF 0%, rgba(233, 237, 255, 0) 72%);
-      background-repeat: no-repeat;
+      color: var(--ink);
+      background: #F8F6FF;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
 
-    /* 单列居中容器：桌面 600px，移动端自适应 */
-    .app {
-      width: 100%;
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 32px 16px 48px;
+    ::selection { color: #fff; background: hsl(var(--violet) 85% 62%); }
+
+    button, input, textarea { font-family: inherit; }
+
+    :focus-visible {
+      outline: 2px solid hsl(var(--violet) 85% 62%);
+      outline-offset: 2px;
     }
 
     .visually-hidden {
       position: absolute;
-      width: 1px;
-      height: 1px;
-      margin: -1px;
-      padding: 0;
+      width: 1px; height: 1px;
+      margin: -1px; padding: 0;
       overflow: hidden;
       clip: rect(0 0 0 0);
       white-space: nowrap;
@@ -99,180 +85,906 @@
     }
 
     /* ==================================================================
-       3. 品牌栏
+       3. 背景：四团彩色极光，缓慢呼吸
        ================================================================== */
+    .aurora {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+      background: linear-gradient(180deg, #FFF7FB 0%, #F6F5FF 42%, #EFFAFF 100%);
+    }
+
+    .aurora__blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(72px);
+      opacity: .55;
+      will-change: transform;
+      animation: blobFloat 20s ease-in-out infinite;
+    }
+
+    .aurora__blob--1 {
+      top: -180px; left: -120px;
+      width: 520px; height: 520px;
+      background: radial-gradient(circle at 40% 40%, #FF9AC8 0%, rgba(255, 154, 200, 0) 68%);
+    }
+
+    .aurora__blob--2 {
+      top: -220px; right: -140px;
+      width: 560px; height: 560px;
+      background: radial-gradient(circle at 50% 50%, #B79BFF 0%, rgba(183, 155, 255, 0) 68%);
+      animation-delay: -6s;
+    }
+
+    .aurora__blob--3 {
+      bottom: -260px; left: 18%;
+      width: 560px; height: 560px;
+      background: radial-gradient(circle at 50% 50%, #8FE8FF 0%, rgba(143, 232, 255, 0) 68%);
+      animation-delay: -12s;
+    }
+
+    .aurora__blob--4 {
+      bottom: -220px; right: 4%;
+      width: 420px; height: 420px;
+      background: radial-gradient(circle at 50% 50%, #FFD79A 0%, rgba(255, 215, 154, 0) 68%);
+      animation-delay: -3s;
+    }
+
+    @keyframes blobFloat {
+      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(24px, -26px, 0) scale(1.08); }
+    }
+
+    /* ==================================================================
+       4. 顶部栏
+       ================================================================== */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255, 255, 255, .72);
+      -webkit-backdrop-filter: saturate(180%) blur(16px);
+      backdrop-filter: saturate(180%) blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, .7);
+      box-shadow: 0 8px 30px -26px rgba(52, 30, 120, .5);
+    }
+
+    /* 顶部一条流动的彩色细线，作为整页的视觉开场 */
+    .topbar::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 2px;
+      background: linear-gradient(90deg,
+        #FF4D9D, #FFB020, #34D399, #22D3EE, #6366F1, #A855F7, #FF4D9D);
+      background-size: 200% 100%;
+      opacity: .6;
+      animation: lineFlow 9s linear infinite;
+    }
+
+    @keyframes lineFlow {
+      to { background-position: 200% 0; }
+    }
+
+    .topbar__inner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 12px 20px;
+    }
+
     .brand {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
-      padding: 0 4px;
+      gap: 10px;
+      flex: none;
     }
 
+    /* 3D 小方块 Logo：渐变 + 内部高光 */
     .brand__logo {
+      position: relative;
       display: grid;
       place-items: center;
-      flex: none;
-      width: 42px;
-      height: 42px;
+      width: 38px;
+      height: 38px;
       border-radius: 13px;
       color: #fff;
-      background: linear-gradient(145deg, #5A74FF 0%, var(--primary) 45%, #2C49D6 100%);
-      box-shadow: 0 8px 18px -10px rgba(59, 91, 254, .9);
+      background:
+        radial-gradient(120% 90% at 30% 0%, rgba(255, 255, 255, .65), rgba(255, 255, 255, 0) 58%),
+        linear-gradient(135deg, #FF4D9D 0%, #A855F7 48%, #22D3EE 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .7),
+        inset 0 -2px 4px rgba(80, 20, 120, .28),
+        0 8px 18px -8px rgba(168, 85, 247, .75);
     }
 
-    .brand__title {
-      margin: 0;
-      font-size: 22px;
+    .brand__logo svg { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .18)); }
+
+    .brand__name {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: .8px;
+      background: linear-gradient(100deg, #FF3D8B 0%, #A855F7 46%, #2F80ED 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      white-space: nowrap;
+    }
+
+    .brand__badge {
+      padding: 1px 7px;
+      border-radius: var(--radius-pill);
+      font-size: 10.5px;
       font-weight: 700;
-      letter-spacing: .3px;
-      line-height: 1.25;
+      letter-spacing: .4px;
+      color: #fff;
+      background: linear-gradient(135deg, #FF7AB8, #A855F7);
+      box-shadow: 0 4px 10px -5px rgba(168, 85, 247, .9);
     }
 
-    .brand__tagline {
-      margin: 2px 0 0;
+    /* 搜索：胶囊 + 彩色描边聚焦 */
+    .search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1 1 auto;
+      max-width: 420px;
+      height: 40px;
+      padding: 0 14px;
+      border-radius: var(--radius-pill);
+      background: rgba(246, 245, 255, .9);
+      border: 1px solid rgba(168, 85, 247, .12);
+      color: var(--ink-3);
+      transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease);
+    }
+
+    .search:focus-within {
+      background: #fff;
+      border-color: rgba(168, 85, 247, .5);
+      box-shadow: 0 0 0 4px rgba(168, 85, 247, .12);
+    }
+
+    .search input {
+      flex: 1 1 auto;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      font-size: 13.5px;
+      color: var(--ink);
+    }
+
+    .search input::placeholder { color: #A6ACC0; }
+    .search input::-webkit-search-cancel-button { display: none; }
+
+    .topbar__actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+      flex: none;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 11px;
+      border-radius: var(--radius-pill);
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #5E6480;
+      background: rgba(255, 255, 255, .8);
+      border: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    .chip svg { opacity: .65; }
+
+    /* ==================================================================
+       5. 3D 按钮体系（发布 / 查看 / 快捷操作）
+       ================================================================== */
+    .btn3d {
+      --h: var(--violet);
+      position: relative;
+      isolation: isolate;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 46px;
+      padding: 0 24px;
+      border: 0;
+      border-radius: 15px;
+      overflow: hidden;
+      cursor: pointer;
+      color: #fff;
+      font-size: 14.5px;
+      font-weight: 800;
+      letter-spacing: .3px;
+      text-shadow: 0 1px 1px rgba(60, 20, 80, .28);
+      /* 上表面渐变 + 顶部玻璃高光 */
+      background:
+        radial-gradient(120% 90% at 50% -35%, rgba(255, 255, 255, .6), rgba(255, 255, 255, 0) 62%),
+        linear-gradient(180deg,
+          hsl(var(--h) 96% 75%) 0%,
+          hsl(var(--h) 92% 59%) 52%,
+          hsl(var(--h) 88% 48%) 100%);
+      /* 内侧压边 + 立体底座 + 彩色投影 */
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .8),
+        inset 0 -2px 4px rgba(50, 0, 70, .22),
+        0 5px 0 hsl(var(--h) 78% 38%),
+        0 10px 18px -7px hsl(var(--h) 88% 48% / .55),
+        0 20px 34px -18px hsl(var(--h) 90% 46% / .75);
+      transform: translateY(0);
+      transition:
+        transform 160ms var(--ease),
+        box-shadow 160ms var(--ease),
+        filter 160ms var(--ease);
+    }
+
+    /* 掠过式高光，鼠标移入时"刷"地扫过一遍 */
+    .btn3d::before {
+      content: "";
+      position: absolute;
+      inset: -50% -25%;
+      z-index: -1;
+      background: linear-gradient(100deg,
+        transparent 32%,
+        rgba(255, 255, 255, .65) 46%,
+        rgba(255, 255, 255, .2) 54%,
+        transparent 68%);
+      transform: translateX(-125%);
+      transition: transform 700ms var(--ease);
+      pointer-events: none;
+    }
+
+    .btn3d:hover:not(:disabled)::before { transform: translateX(125%); }
+
+    .btn3d:hover:not(:disabled) {
+      transform: translateY(-2px);
+      filter: saturate(1.06);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .85),
+        inset 0 -2px 4px rgba(50, 0, 70, .22),
+        0 7px 0 hsl(var(--h) 78% 38%),
+        0 16px 24px -8px hsl(var(--h) 88% 48% / .6),
+        0 26px 44px -20px hsl(var(--h) 90% 46% / .8);
+    }
+
+    .btn3d:active:not(:disabled) {
+      transform: translateY(4px);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .7),
+        inset 0 -1px 3px rgba(50, 0, 70, .25),
+        0 1px 0 hsl(var(--h) 78% 36%),
+        0 4px 10px -6px hsl(var(--h) 88% 45% / .6);
+    }
+
+    .btn3d:disabled {
+      cursor: not-allowed;
+      color: rgba(255, 255, 255, .85);
+      background: linear-gradient(180deg, #CFD3E2 0%, #B9BECF 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .6),
+        0 3px 0 #9EA4B8,
+        0 8px 14px -10px rgba(18, 19, 36, .4);
+      text-shadow: none;
+      filter: saturate(.2);
+    }
+
+    .btn3d--sm {
+      height: 38px;
+      padding: 0 16px;
+      border-radius: 12px;
       font-size: 13px;
-      color: var(--text-faint);
-      line-height: 1.4;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .75),
+        inset 0 -2px 3px rgba(50, 0, 70, .2),
+        0 4px 0 hsl(var(--h) 78% 38%),
+        0 8px 14px -6px hsl(var(--h) 88% 48% / .5),
+        0 16px 26px -16px hsl(var(--h) 90% 46% / .7);
+    }
+
+    /* 卡片里的「查看」按钮：小号但同样立体 */
+    .btn3d--mini {
+      --h: var(--cyan);
+      height: 32px;
+      padding: 0 15px;
+      border-radius: 11px;
+      font-size: 12.5px;
+      gap: 5px;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .8),
+        inset 0 -2px 3px rgba(0, 60, 70, .2),
+        0 3px 0 hsl(var(--h) 80% 34%),
+        0 7px 12px -5px hsl(var(--h) 85% 40% / .55),
+        0 12px 20px -14px hsl(var(--h) 85% 40% / .6);
+    }
+
+    .btn3d--mini:hover:not(:disabled) { transform: translateY(-2px); }
+
+    /* 主发布按钮：粉→紫→蓝→青的流动彩色，配一圈旋转光晕 */
+    .btn3d--hero {
+      --h: 330;
+      height: 52px;
+      padding: 0 30px;
+      font-size: 15px;
+      border-radius: 17px;
+      background:
+        radial-gradient(120% 90% at 50% -40%, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 60%),
+        linear-gradient(115deg, #FF4D9D 0%, #F45BB8 18%, #A855F7 48%, #6366F1 74%, #22D3EE 100%);
+      background-size: 100% 100%, 220% 100%;
+      animation: hueFlow 7s ease-in-out infinite, heroBreath 4.6s ease-in-out infinite;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .8),
+        inset 0 -2px 5px rgba(60, 0, 90, .24),
+        0 6px 0 #7C3ACB,
+        0 12px 22px -8px rgba(168, 85, 247, .6),
+        0 26px 44px -20px rgba(255, 61, 139, .65);
+    }
+
+    .btn3d--hero:hover:not(:disabled) {
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .9),
+        inset 0 -2px 5px rgba(60, 0, 90, .24),
+        0 9px 0 #7C3ACB,
+        0 18px 28px -8px rgba(168, 85, 247, .65),
+        0 34px 54px -22px rgba(255, 61, 139, .75);
+    }
+
+    .btn3d--hero:active:not(:disabled) {
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .75),
+        inset 0 -1px 3px rgba(60, 0, 90, .28),
+        0 1px 0 #6B2FB0,
+        0 6px 14px -8px rgba(168, 85, 247, .6);
+    }
+
+    /* 未输入时保留粉紫渐变，但降为柔和的浅彩，不抢焦点 */
+    .btn3d--hero:disabled {
+      color: rgba(255, 255, 255, .92);
+      background:
+        radial-gradient(120% 90% at 50% -40%, rgba(255, 255, 255, .4), rgba(255, 255, 255, 0) 60%),
+        linear-gradient(115deg, #F7A9CC 0%, #D5B7F3 50%, #A9C6F6 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .65),
+        inset 0 -2px 3px rgba(120, 80, 160, .12),
+        0 4px 0 #CBB8E4;
+      filter: none;
+      text-shadow: 0 1px 1px rgba(120, 80, 160, .18);
+    }
+
+    @keyframes hueFlow {
+      0%, 100% { background-position: 0% 50%, 0% 50%; }
+      50% { background-position: 0% 50%, 100% 50%; }
+    }
+
+    @keyframes heroBreath {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-2px); }
+    }
+
+    /* 按钮外圈：旋转的彩色光晕，制造"发光"的动感 */
+    .publish-slot {
+      position: relative;
+      isolation: isolate;
+      display: inline-flex;
+      border-radius: 20px;
+    }
+
+    .publish-slot::before {
+      content: "";
+      position: absolute;
+      inset: -7px;
+      z-index: -1;
+      border-radius: 24px;
+      background: conic-gradient(from 0deg,
+        #FF4D9D, #FFB020, #34D399, #22D3EE, #6366F1, #A855F7, #FF4D9D);
+      filter: blur(13px);
+      opacity: .55;
+      animation: glowSpin 9s linear infinite;
+    }
+
+    @keyframes glowSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    .btn3d--ghost {
+      --h: var(--violet);
+      color: #5B4B8A;
+      text-shadow: none;
+      background: linear-gradient(180deg, #FFFFFF 0%, #F2EEFF 100%);
+      box-shadow:
+        inset 0 1px 0 #fff,
+        inset 0 -2px 3px rgba(90, 60, 140, .12),
+        0 4px 0 #D9D2F0,
+        0 8px 16px -8px rgba(90, 60, 140, .35);
+    }
+
+    .btn3d--ghost:hover:not(:disabled) {
+      box-shadow:
+        inset 0 1px 0 #fff,
+        inset 0 -2px 3px rgba(90, 60, 140, .12),
+        0 6px 0 #D9D2F0,
+        0 12px 20px -10px rgba(90, 60, 140, .4);
     }
 
     /* ==================================================================
-       4. 卡片通用样式
+       6. 页面骨架：左导航 / 中信息流 / 右热议
        ================================================================== */
+    .shell {
+      display: grid;
+      grid-template-columns: 224px minmax(0, 1fr) 300px;
+      gap: 20px;
+      align-items: start;
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 22px 20px 72px;
+    }
+
     .card {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255, 255, 255, .9);
+      border-radius: var(--radius-xl);
       box-shadow: var(--shadow-card);
-      transition: box-shadow var(--dur-base) var(--ease),
-                  border-color var(--dur-base) var(--ease),
-                  transform var(--dur-fast) var(--ease);
     }
 
-    /* ==================================================================
-       5. 发布卡片（Composer）
-       ================================================================== */
-    .composer {
+    /* ---------------- 左侧栏 ---------------- */
+    .rail {
+      position: sticky;
+      top: 86px;
       display: flex;
-      gap: 12px;
-      padding: 18px 20px;
-      margin-bottom: 16px;
+      flex-direction: column;
+      gap: 14px;
     }
 
-    /* 聚焦时整张卡片描边与阴影联动，形成"正在书写"的聚焦感 */
-    .composer:focus-within {
-      border-color: rgba(59, 91, 254, .55);
-      box-shadow: 0 2px 6px rgba(59, 91, 254, .06), 0 20px 40px -22px rgba(59, 91, 254, .55);
+    .rail__me {
+      padding: 20px 18px 16px;
+      text-align: center;
+      background:
+        radial-gradient(120% 80% at 50% 0%, rgba(255, 61, 139, .1), rgba(255, 61, 139, 0) 62%),
+        var(--surface);
     }
 
     .avatar {
+      display: inline-grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #fff;
+      font-weight: 700;
+      user-select: none;
+      background:
+        radial-gradient(120% 100% at 30% 5%, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 56%),
+        linear-gradient(160deg, hsl(var(--h, 268) 92% 76%) 0%, hsl(var(--h, 268) 84% 56%) 58%, hsl(var(--h, 268) 76% 44%) 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .6),
+        inset 0 -3px 6px rgba(0, 0, 0, .16),
+        0 8px 18px -8px hsl(var(--h, 268) 80% 50% / .8);
+    }
+
+    .avatar--xl { width: 64px; height: 64px; font-size: 23px; border: 3px solid #fff; }
+    .avatar--lg { width: 46px; height: 46px; font-size: 16px; border: 2px solid #fff; flex: none; }
+    .avatar--md { width: 40px; height: 40px; font-size: 14px; flex: none; }
+
+    .rail__name {
+      margin: 10px 0 0;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: .3px;
+    }
+
+    .rail__bio {
+      margin: 2px 0 0;
+      font-size: 11.5px;
+      color: var(--ink-3);
+    }
+
+    .rail__stats {
+      display: flex;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .rail__stats > div {
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      position: relative;
+    }
+
+    .rail__stats > div + div::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 4px; bottom: 4px;
+      width: 1px;
+      background: var(--line);
+    }
+
+    .rail__stats b {
+      font-size: 16px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rail__stats span { font-size: 11px; color: var(--ink-3); }
+
+    .rail__nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px;
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, .66);
+      border: 1px solid rgba(255, 255, 255, .9);
+      box-shadow: var(--shadow-card);
+    }
+
+    .navitem {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      width: 100%;
+      padding: 8px 10px;
+      border: 0;
+      border-radius: 14px;
+      background: transparent;
+      color: var(--ink-2);
+      font-size: 13.5px;
+      font-weight: 650;
+      text-align: left;
+      cursor: pointer;
+      transition: background var(--dur) var(--ease), color var(--dur) var(--ease), transform var(--dur) var(--ease);
+    }
+
+    .navitem:hover { background: rgba(168, 85, 247, .07); color: var(--ink); transform: translateX(2px); }
+
+    .navitem.is-active {
+      color: #fff;
+      background: linear-gradient(120deg, #FF4D9D 0%, #A855F7 60%, #6366F1 100%);
+      box-shadow: 0 10px 20px -12px rgba(168, 85, 247, .85);
+    }
+
+    .navitem.is-active .navitem__icon {
+      background: rgba(255, 255, 255, .22);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5);
+    }
+
+    .navitem__icon {
       display: grid;
       place-items: center;
       flex: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      font-size: 15px;
-      font-weight: 600;
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
       color: #fff;
-      user-select: none;
-      background: linear-gradient(145deg, #8FA2FF 0%, #5C77FF 55%, #3B5BFE 100%);
+      background: linear-gradient(150deg, hsl(var(--h) 92% 72%), hsl(var(--h) 82% 52%));
+      box-shadow: 0 5px 12px -6px hsl(var(--h) 82% 45% / .9);
+      transition: background var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
     }
 
-    .composer__body {
+    .rail__tip {
+      margin: 0;
+      padding: 0 6px;
+      font-size: 11px;
+      line-height: 1.6;
+      color: var(--ink-3);
+    }
+
+    /* ---------------- 中间主列 ---------------- */
+    .feed {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    /* ---------------- 右侧栏 ---------------- */
+    .side {
+      position: sticky;
+      top: 86px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .side__card { padding: 18px; }
+
+    .side__head {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 12px;
+    }
+
+    .side__head h2 {
+      margin: 0;
+      font-size: 14.5px;
+      font-weight: 800;
+      letter-spacing: .3px;
+    }
+
+    .pulse-dot {
+      position: relative;
+      width: 7px;
+      height: 7px;
+      margin-left: auto;
+      border-radius: 50%;
+      background: #34D399;
+      box-shadow: 0 0 0 3px rgba(52, 211, 153, .18);
+    }
+
+    .pulse-dot::after {
+      content: "";
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(52, 211, 153, .6);
+      animation: pulseRing 2.4s var(--ease) infinite;
+    }
+
+    @keyframes pulseRing {
+      0% { transform: scale(.8); opacity: .9; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+
+    .topics {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .topic {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      padding: 7px 8px;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+      transition: background var(--dur) var(--ease), transform var(--dur) var(--ease);
+    }
+
+    .topic:hover { background: rgba(168, 85, 247, .07); transform: translateX(2px); }
+
+    .topic__rank {
+      display: grid;
+      place-items: center;
+      flex: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      background: linear-gradient(150deg, hsl(var(--h) 90% 70%), hsl(var(--h) 84% 52%));
+      box-shadow: 0 4px 9px -5px hsl(var(--h) 84% 46% / .95);
+    }
+
+    .topic__name {
       flex: 1 1 auto;
       min-width: 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-2);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .topic__count {
+      flex: none;
+      font-size: 11px;
+      color: var(--ink-3);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .side__note p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.75;
+      color: var(--ink-3);
+    }
+
+    .side__note strong { color: hsl(var(--violet) 70% 55%); font-weight: 700; }
+
+    /* ==================================================================
+       7. 发布卡片
+       ================================================================== */
+    .composer {
+      padding: 20px;
+      scroll-margin-top: 86px;
+      background:
+        radial-gradient(100% 70% at 8% 0%, rgba(255, 61, 139, .08), rgba(255, 61, 139, 0) 60%),
+        radial-gradient(90% 70% at 100% 10%, rgba(34, 211, 238, .1), rgba(34, 211, 238, 0) 60%),
+        var(--surface);
+      transition: box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease);
+    }
+
+    .composer:focus-within {
+      border-color: rgba(168, 85, 247, .28);
+      box-shadow: 0 0 0 4px rgba(168, 85, 247, .08), var(--shadow-lift);
+    }
+
+    .composer__head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .composer__title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+
+    .composer__sub {
+      margin: 1px 0 0;
+      font-size: 11.5px;
+      color: var(--ink-3);
     }
 
     .composer__input {
       display: block;
       width: 100%;
-      min-height: 84px;
+      min-height: 96px;
       max-height: 260px;
-      padding: 4px 0 8px;
-      border: 0;
+      padding: 13px 15px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
       outline: 0;
       resize: none;
-      background: transparent;
-      font-family: inherit;
-      font-size: 16px; /* 16px 可避免 iOS Safari 聚焦时自动放大页面 */
-      line-height: 1.65;
-      color: var(--text);
+      background: rgba(250, 249, 255, .88);
+      font-size: 15.5px;
+      line-height: 1.75;
+      color: var(--ink);
+      transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);
     }
 
-    .composer__input::placeholder { color: var(--text-faint); }
+    .composer__input:focus { background: #fff; border-color: rgba(168, 85, 247, .32); }
+    .composer__input::placeholder { color: #A9AEC2; }
 
-    .composer__footer {
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 11px;
+    }
+
+    .chip-tag {
+      padding: 4px 11px;
+      border: 1px dashed rgba(168, 85, 247, .28);
+      border-radius: var(--radius-pill);
+      background: rgba(168, 85, 247, .05);
+      color: hsl(var(--violet) 55% 52%);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--dur) var(--ease);
+    }
+
+    .chip-tag:hover {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(120deg, #A855F7, #22D3EE);
+      box-shadow: 0 8px 16px -10px rgba(168, 85, 247, .9);
+      transform: translateY(-1px);
+    }
+
+    .composer__foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    .counter {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .counter__bar {
+      width: 92px;
+      height: 6px;
+      border-radius: 99px;
+      background: #ECEAF7;
+      overflow: hidden;
+    }
+
+    .counter__fill {
+      display: block;
+      width: 0%;
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #22D3EE, #A855F7, #FF4D9D);
+      transition: width 180ms var(--ease), background 180ms var(--ease);
+    }
+
+    .counter__text {
+      font-size: 12px;
+      color: var(--ink-3);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .counter[data-state="warn"] .counter__fill { background: linear-gradient(90deg, #FBBF24, #F97316); }
+    .counter[data-state="warn"] .counter__text { color: #D97706; }
+    .counter[data-state="over"] .counter__fill { background: linear-gradient(90deg, #FB7185, #E11D48); }
+    .counter[data-state="over"] .counter__text { color: #E11D48; font-weight: 700; }
+
+    /* ==================================================================
+       8. 信息流工具条
+       ================================================================== */
+    .feedbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      padding-top: 12px;
-      border-top: 1px solid var(--surface-alt);
+      padding: 0 4px;
     }
 
-    .composer__counter {
-      font-size: 13px;
-      color: var(--text-faint);
-      font-variant-numeric: tabular-nums;
-      transition: color var(--dur-fast) var(--ease);
-    }
-
-    /* 剩余字数进入告警区 / 已超出 */
-    .composer__counter[data-state="warn"] { color: var(--warn); }
-    .composer__counter[data-state="over"] { color: var(--danger); font-weight: 600; }
-
-    /* ==================================================================
-       6. 按钮
-       ================================================================== */
-    .btn {
+    .tabs {
       display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      min-height: 40px;
-      padding: 0 22px;
+      gap: 4px;
+      padding: 4px;
+      border-radius: var(--radius-pill);
+      background: rgba(255, 255, 255, .7);
+      border: 1px solid rgba(255, 255, 255, .9);
+      box-shadow: var(--shadow-card);
+    }
+
+    .tab {
+      padding: 6px 16px;
       border: 0;
       border-radius: var(--radius-pill);
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: .2px;
+      background: transparent;
+      color: var(--ink-2);
+      font-size: 13px;
+      font-weight: 700;
       cursor: pointer;
-      transition: background-color var(--dur-fast) var(--ease),
-                  color var(--dur-fast) var(--ease),
-                  transform var(--dur-fast) var(--ease),
-                  box-shadow var(--dur-fast) var(--ease);
+      transition: all var(--dur) var(--ease);
     }
 
-    .btn--primary {
+    .tab:hover { color: hsl(var(--violet) 60% 52%); }
+
+    .tab.is-active {
       color: #fff;
-      background: var(--primary);
-      box-shadow: 0 8px 18px -10px rgba(59, 91, 254, .95);
+      background: linear-gradient(120deg, #FF4D9D 0%, #A855F7 55%, #6366F1 100%);
+      box-shadow: 0 8px 16px -10px rgba(168, 85, 247, .95);
     }
 
-    .btn--primary:hover:not(:disabled) {
-      background: var(--primary-strong);
-      transform: translateY(-1px);
-      box-shadow: 0 12px 22px -10px rgba(38, 71, 216, .95);
-    }
-
-    .btn--primary:active:not(:disabled) { transform: translateY(0); }
-
-    .btn:disabled {
-      color: var(--text-faint);
-      background: var(--surface-alt);
-      box-shadow: none;
-      cursor: not-allowed;
-    }
-
-    .btn:focus-visible {
-      outline: 2px solid var(--primary);
-      outline-offset: 2px;
+    .feedbar__count {
+      font-size: 12px;
+      color: var(--ink-3);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
 
     /* ==================================================================
-       7. 信息流容器
+       9. 片语卡片
        ================================================================== */
     .timeline {
       display: flex;
@@ -283,131 +995,203 @@
       list-style: none;
     }
 
-    /* 作者样式优先级高于 UA 的 [hidden]，需显式声明才生效 */
     .timeline[hidden] { display: none; }
 
-    /* ==================================================================
-       8. 信息流卡片（Post）
-       ================================================================== */
     .post {
+      position: relative;
       display: flex;
       gap: 12px;
-      padding: 16px 20px;
+      padding: 18px 20px 12px;
+      overflow: hidden;
+      transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), opacity 200ms var(--ease);
     }
 
-    .post__main {
-      flex: 1 1 auto;
-      min-width: 0; /* 允许长串字符换行，不撑破卡片 */
+    /* 左侧彩色细条：卡片的第一眼颜色 */
+    .post::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 20px;
+      bottom: 20px;
+      width: 3px;
+      border-radius: 0 4px 4px 0;
+      background: linear-gradient(180deg, hsl(var(--h) 92% 72%), hsl(var(--h) 88% 58%));
+      opacity: .85;
+      transition: opacity var(--dur) var(--ease);
     }
+
+    .post:hover,
+    .post:focus-within {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lift);
+    }
+
+    .post:hover::before { opacity: 1; }
+
+    .post__main { flex: 1 1 auto; min-width: 0; }
 
     .post__head {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      line-height: 1.5;
+      gap: 10px;
     }
 
-    .post__author {
-      font-weight: 600;
-      color: var(--text);
+    .post__who { min-width: 0; flex: 1 1 auto; }
+
+    .post__name {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      font-weight: 750;
+      color: var(--ink);
     }
 
-    .post__dot { color: var(--text-faint); }
+    .post__name svg { color: hsl(var(--violet) 82% 60%); }
 
-    .post__time {
-      color: var(--text-faint);
+    .post__meta {
+      display: block;
+      margin-top: 1px;
+      font-size: 11.5px;
+      color: var(--ink-3);
       font-variant-numeric: tabular-nums;
     }
 
+    .post__badge {
+      flex: none;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: hsl(var(--violet) 62% 54%);
+      background: hsl(var(--violet) 90% 96%);
+      border: 1px solid hsl(var(--violet) 80% 90%);
+    }
+
     .post__body {
-      margin: 6px 0 0;
-      font-size: 15px;
-      line-height: 1.7;
-      color: var(--text-muted);
-      /* 保留用户输入中的换行，同时允许超长单词/链接折行 */
+      margin: 10px 0 0;
+      font-size: 15.2px;
+      line-height: 1.78;
+      color: #262B3D;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
     }
 
-    /* 卡片右上角的删除入口：默认低透明度，悬停卡片时浮现 */
-    .post__delete {
-      margin-left: auto;
-      opacity: .4;
-      transition: opacity var(--dur-fast) var(--ease),
-                  color var(--dur-fast) var(--ease),
-                  background-color var(--dur-fast) var(--ease);
-    }
-
-    .post:hover .post__delete,
-    .post:focus-within .post__delete { opacity: 1; }
-
-    /* 通用图标按钮 */
-    .icon-btn {
-      display: grid;
-      place-items: center;
-      flex: none;
-      width: 32px;
-      height: 32px;
-      padding: 0;
-      border: 0;
-      border-radius: 50%;
-      color: var(--text-faint);
-      background: transparent;
+    .tag {
+      color: hsl(var(--violet) 68% 56%);
+      font-weight: 600;
       cursor: pointer;
-      transition: color var(--dur-fast) var(--ease),
-                  background-color var(--dur-fast) var(--ease);
+      transition: color var(--dur) var(--ease);
     }
 
-    .icon-btn:hover {
-      color: var(--danger);
-      background: rgba(239, 68, 68, .09);
+    .tag:hover { color: hsl(var(--pink) 80% 58%); text-decoration: underline; }
+
+    .post__actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 12px 0 0;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(18, 19, 36, .06);
     }
 
-    .icon-btn:focus-visible {
-      outline: 2px solid var(--primary);
-      outline-offset: 2px;
+    .like-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 11px;
+      border: 0;
+      border-radius: 99px;
+      background: rgba(244, 242, 252, .9);
+      color: #7A7F96;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--dur) var(--ease);
+    }
+
+    .like-btn:hover { color: hsl(var(--pink) 80% 56%); background: hsl(var(--pink) 90% 96%); }
+
+    .like-btn.is-liked {
+      color: #fff;
+      background: linear-gradient(130deg, #FF7AB8, #FF3D8B 55%, #E11D63);
+      box-shadow: 0 8px 16px -10px rgba(225, 29, 99, .95);
+    }
+
+    .like-btn.is-liked svg { fill: currentColor; }
+
+    .like-btn.is-bump svg { animation: heartBump 420ms var(--ease); }
+
+    @keyframes heartBump {
+      0% { transform: scale(1); }
+      35% { transform: scale(1.45); }
+      60% { transform: scale(.9); }
+      100% { transform: scale(1); }
+    }
+
+    .ghost-btn {
+      padding: 5px 11px;
+      border: 0;
+      border-radius: 99px;
+      background: transparent;
+      color: #8B90A6;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--dur) var(--ease);
+    }
+
+    .ghost-btn:hover { color: hsl(var(--blue) 70% 56%); background: hsl(var(--blue) 90% 96%); }
+
+    .post__actions .btn3d--mini { margin-left: auto; }
+
+    .post.is-entering { animation: cardIn 420ms var(--ease) both; }
+
+    .post.is-leaving {
+      opacity: 0;
+      transform: translateY(-8px) scale(.99);
+      transition: opacity 220ms var(--ease), transform 220ms var(--ease);
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(14px) scale(.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     /* ==================================================================
-       9. 空状态
+       10. 空状态
        ================================================================== */
     .empty {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 24px 36px;
+      padding: 44px 24px 40px;
       text-align: center;
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255, 255, 255, .9);
+      border-radius: var(--radius-xl);
       box-shadow: var(--shadow-card);
     }
 
     .empty[hidden] { display: none; }
 
-    .empty__art {
-      width: 160px;
-      height: 120px;
-      opacity: .95;
-    }
+    .empty__art { width: 190px; height: 140px; }
 
     .empty__title {
       margin: 12px 0 0;
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text);
+      font-size: 15.5px;
+      font-weight: 800;
     }
 
     .empty__desc {
-      margin: 6px 0 0;
-      font-size: 13px;
-      line-height: 1.65;
-      color: var(--text-faint);
+      margin: 5px 0 0;
+      font-size: 12.5px;
+      line-height: 1.75;
+      color: var(--ink-3);
     }
 
     /* ==================================================================
-       10. 删除确认弹窗
+       11. 弹层：查看详情 + 删除确认
        ================================================================== */
     .modal {
       position: fixed;
@@ -423,206 +1207,409 @@
     .modal__backdrop {
       position: absolute;
       inset: 0;
-      background: rgba(15, 23, 42, .45);
-      -webkit-backdrop-filter: blur(8px);
-      backdrop-filter: blur(8px);
-      animation: backdropIn var(--dur-base) var(--ease);
+      background: rgba(20, 14, 45, .46);
+      -webkit-backdrop-filter: blur(9px);
+      backdrop-filter: blur(9px);
+      animation: fadeIn var(--dur) var(--ease);
     }
 
-    .modal__panel {
+    .sheet {
       position: relative;
-      width: min(320px, 100%);
-      padding: 22px;
-      border-radius: 20px;
-      background: var(--surface);
-      box-shadow: 0 28px 64px -22px rgba(15, 23, 42, .5);
-      animation: modalIn var(--dur-base) var(--ease);
+      width: min(560px, 100%);
+      max-height: min(86vh, 760px);
+      overflow: auto;
+      border-radius: 26px;
+      background: #fff;
+      box-shadow: var(--shadow-float);
+      animation: sheetIn 300ms var(--ease);
     }
 
-    .modal__title {
+    .sheet__banner {
+      position: relative;
+      height: 86px;
+      background:
+        radial-gradient(120% 120% at 20% 0%, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 60%),
+        linear-gradient(120deg, hsl(var(--h) 92% 68%), hsl(calc(var(--h) + 45) 88% 58%) 55%, hsl(calc(var(--h) + 90) 86% 62%));
+      overflow: hidden;
+    }
+
+    .sheet__banner::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 85% 20%, rgba(255, 255, 255, .55), transparent 45%),
+        radial-gradient(circle at 15% 120%, rgba(255, 255, 255, .35), transparent 50%);
+    }
+
+    .sheet__close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 2;
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(255, 255, 255, .5);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .55);
+      color: #3A2A5A;
+      cursor: pointer;
+      transition: all var(--dur) var(--ease);
+    }
+
+    .sheet__close:hover { background: #fff; transform: rotate(90deg); }
+
+    .sheet__body { padding: 0 24px 24px; }
+
+    .sheet__head {
+      position: relative;
+      z-index: 2;
+      margin-top: -30px;
+    }
+
+    /* 头像探出封面，昵称与时间则落在封面下方，避免文字压色块 */
+    .sheet__head .avatar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      border: 3px solid #fff;
+    }
+
+    .sheet__who { padding: 40px 0 0 60px; }
+
+    .sheet__name {
       margin: 0;
       font-size: 17px;
-      font-weight: 700;
-      letter-spacing: .2px;
+      font-weight: 800;
+      letter-spacing: .3px;
     }
 
-    .modal__desc {
-      margin: 8px 0 0;
-      font-size: 13.5px;
-      line-height: 1.65;
-      color: var(--text-muted);
+    .sheet__meta {
+      margin: 1px 0 0;
+      font-size: 12px;
+      color: var(--ink-3);
+      font-variant-numeric: tabular-nums;
     }
 
-    .modal__actions {
+    .sheet__content {
+      margin: 16px 0 0;
+      font-size: 16px;
+      line-height: 1.85;
+      color: #202536;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .sheet__stats {
       display: flex;
-      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .sheet__stats > div {
+      flex: 1 1 0;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: linear-gradient(160deg, #FAF8FF, #F2F6FF);
+      border: 1px solid rgba(168, 85, 247, .1);
+      text-align: center;
+    }
+
+    .sheet__stats b {
+      display: block;
+      font-size: 15px;
+      font-weight: 800;
+      color: hsl(var(--violet) 62% 52%);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sheet__stats span { font-size: 11px; color: var(--ink-3); }
+
+    .sheet__actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
       gap: 10px;
       margin-top: 20px;
     }
 
-    .btn--ghost {
-      color: var(--text-muted);
-      background: var(--surface);
-      border: 1px solid var(--border);
+    .sheet__actions .btn3d { flex: 1 1 auto; }
+
+    .btn-ghost-danger {
+      height: 42px;
+      padding: 0 16px;
+      border: 1px solid rgba(239, 68, 68, .22);
+      border-radius: 13px;
+      background: #FFF6F7;
+      color: #E11D48;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--dur) var(--ease);
     }
 
-    .btn--ghost:hover {
-      color: var(--text);
-      background: var(--surface-alt);
-    }
+    .btn-ghost-danger:hover { background: #FFE9EE; transform: translateY(-1px); }
 
-    .btn--danger {
-      color: #fff;
-      background: var(--danger);
-      box-shadow: 0 8px 18px -10px rgba(239, 68, 68, .9);
-    }
-
-    .btn--danger:hover {
-      background: #DC2626;
-      transform: translateY(-1px);
-    }
-
-    /* 弹窗打开时锁定页面滚动 */
-    body.is-modal-open { overflow: hidden; }
-
-    @keyframes backdropIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes modalIn {
-      from { opacity: 0; transform: scale(.96) translateY(6px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-
-    /* ==================================================================
-       11. 页脚
-       ================================================================== */
-    .page-footer {
-      margin-top: 28px;
+    .confirm {
+      position: relative;
+      z-index: 2;
+      width: min(330px, 100%);
+      padding: 24px;
+      border-radius: 24px;
+      background: #fff;
       text-align: center;
-      font-size: 12px;
-      color: var(--text-faint);
+      box-shadow: var(--shadow-float);
+      animation: sheetIn 260ms var(--ease);
     }
 
-    /* ==================================================================
-       12. 悬停、入场与状态微动效
-       ================================================================== */
-    .post:hover,
-    .post:focus-within {
-      transform: translateY(-1px);
-      border-color: #DCE2F0;
-      box-shadow: var(--shadow-card-hover);
-    }
-
-    /* 离场态需压过 hover 的 transform，故写在 hover 之后 */
-    .post.is-leaving {
-      opacity: 0;
-      transform: translateY(-4px);
-      transition: opacity 200ms var(--ease), transform 200ms var(--ease);
-    }
-
-    /* 新发布的卡片：淡入 + 轻微上移 */
-    .post.is-entering { animation: fadeSlideIn 320ms var(--ease) both; }
-
-    @keyframes fadeSlideIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* 发布按钮的加载指示 */
-    .btn__spinner {
-      display: none;
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(255, 255, 255, .45);
-      border-top-color: #fff;
+    .confirm__icon {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      margin: 0 auto 12px;
       border-radius: 50%;
+      color: #E11D48;
+      background: #FFEDF1;
     }
 
-    .btn.is-loading { pointer-events: none; }
+    .confirm__title { margin: 0; font-size: 16px; font-weight: 800; }
 
-    .btn.is-loading .btn__spinner {
-      display: block;
-      animation: spin .7s linear infinite;
+    .confirm__desc {
+      margin: 7px 0 0;
+      font-size: 12.5px;
+      line-height: 1.7;
+      color: var(--ink-3);
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .confirm__actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
     }
 
-    /* 字数超限时抖动一次，强化"无法发布"的反馈 */
-    .composer__counter.is-shake { animation: shake 320ms var(--ease); }
+    .confirm__actions > * { flex: 1 1 0; }
 
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-3px); }
-      50% { transform: translateX(3px); }
-      75% { transform: translateX(-2px); }
+    .btn-flat {
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #F5F5FA;
+      color: var(--ink-2);
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--dur) var(--ease);
+    }
+
+    .btn-flat:hover { background: #ECECF5; }
+
+    .btn-danger {
+      height: 42px;
+      border: 0;
+      border-radius: 13px;
+      background: linear-gradient(180deg, #FB7185, #E11D48);
+      color: #fff;
+      font-size: 13.5px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 4px 0 #BE123C, 0 10px 18px -10px rgba(225, 29, 72, .9);
+      transition: all var(--dur) var(--ease);
+    }
+
+    .btn-danger:hover { transform: translateY(-1px); }
+    .btn-danger:active { transform: translateY(3px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 1px 0 #BE123C; }
+
+    body.is-locked { overflow: hidden; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    @keyframes sheetIn {
+      from { opacity: 0; transform: translateY(16px) scale(.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     /* ==================================================================
-       13. 轻提示（Toast）
+       12. 轻提示
        ================================================================== */
     .toast {
       position: fixed;
       left: 50%;
-      bottom: 28px;
-      z-index: 90;
+      bottom: 34px;
+      z-index: 95;
       max-width: calc(100% - 32px);
-      padding: 10px 18px;
-      border-radius: var(--radius-pill);
+      padding: 11px 20px;
+      border-radius: 99px;
       font-size: 13px;
+      font-weight: 600;
       color: #fff;
-      background: rgba(15, 23, 42, .92);
-      box-shadow: 0 12px 30px -12px rgba(15, 23, 42, .6);
+      background: linear-gradient(120deg, rgba(255, 61, 139, .96), rgba(168, 85, 247, .96) 55%, rgba(99, 102, 241, .96));
+      box-shadow: 0 18px 36px -18px rgba(168, 85, 247, .9);
       opacity: 0;
-      transform: translateX(-50%) translateY(10px);
-      transition: opacity var(--dur-base) var(--ease), transform var(--dur-base) var(--ease);
+      transform: translateX(-50%) translateY(12px);
+      transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
       pointer-events: none;
+      white-space: nowrap;
     }
 
     .toast[hidden] { display: none; }
-
-    .toast.is-visible {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
+    .toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* ==================================================================
-       14. 响应式：移动端收窄留白、按钮整行
+       13. 页脚 + 移动端底栏
        ================================================================== */
-    @media (max-width: 639px) {
-      .app { padding: 20px 12px 36px; }
+    .page-footer {
+      margin-top: 8px;
+      padding: 6px 0 0;
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: .3px;
+      color: #A2A7BB;
+    }
 
-      .brand { margin-bottom: 14px; }
-      .brand__title { font-size: 20px; }
-      .brand__logo { width: 38px; height: 38px; border-radius: 12px; }
+    .tabbar { display: none; }
 
-      .composer,
-      .post { padding: 14px; border-radius: 14px; }
+    /* ==================================================================
+       14. 响应式
+       ================================================================== */
+    @media (max-width: 1080px) {
+      .shell { grid-template-columns: minmax(0, 1fr) 288px; }
+      .rail { display: none; }
+    }
 
-      .composer__footer {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
+    @media (max-width: 880px) {
+      .shell {
+        grid-template-columns: minmax(0, 1fr);
+        padding: 14px 12px calc(96px + env(safe-area-inset-bottom));
       }
 
-      .btn--primary { width: 100%; }
+      .side { display: none; }
 
-      /* 触屏没有 hover，删除入口保持常显可点 */
-      .post__delete { opacity: .55; }
+      .topbar__inner { flex-wrap: wrap; gap: 9px; padding: 10px 14px; }
 
-      .empty { padding: 30px 18px 28px; border-radius: 14px; }
+      .search {
+        order: 3;
+        flex: 1 1 100%;
+        max-width: none;
+        height: 38px;
+      }
+
+      .topbar__actions .chip,
+      .topbar__actions .btn3d { display: none; }
+
+      .brand__name { font-size: 16px; }
+
+      .composer { padding: 16px; border-radius: var(--radius-lg); }
+      .composer__input { min-height: 88px; }
+
+      .composer__foot {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+
+      .counter { justify-content: space-between; }
+      .counter__bar { flex: 1 1 auto; width: auto; }
+
+      .publish-slot { display: flex; }
+      .btn3d--hero { width: 100%; }
+
+      .post { padding: 16px 16px 10px; border-radius: var(--radius-lg); }
+      .post::before { top: 18px; bottom: 18px; }
+      .post__body { font-size: 15px; }
+
+      .post__actions { gap: 6px; }
+      .ghost-btn { display: none; }
+
+      .sheet { max-height: 84vh; }
+      .sheet__body { padding: 0 18px 20px; }
+      .sheet__content { font-size: 15.5px; }
+
+      /* 吸底导航 */
+      .tabbar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 60;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        align-items: end;
+        gap: 2px;
+        padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+        background: rgba(255, 255, 255, .82);
+        -webkit-backdrop-filter: saturate(180%) blur(18px);
+        backdrop-filter: saturate(180%) blur(18px);
+        border-top: 1px solid rgba(255, 255, 255, .9);
+        box-shadow: 0 -12px 30px -28px rgba(52, 30, 120, .6);
+      }
+
+      .tabbar__item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        padding: 4px 0;
+        border: 0;
+        border-radius: 12px;
+        background: transparent;
+        color: #8B90A6;
+        font-size: 10.5px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: color var(--dur) var(--ease), transform var(--dur) var(--ease);
+      }
+
+      .tabbar__item svg { opacity: .85; }
+      .tabbar__item:hover { color: hsl(var(--violet) 62% 56%); }
+      .tabbar__item.is-active { color: hsl(var(--violet) 68% 56%); }
+      .tabbar__item.is-active svg { filter: drop-shadow(0 4px 8px rgba(168, 85, 247, .45)); }
+
+      /* 中间悬浮发布键：圆形 3D */
+      .tabbar__fab {
+        justify-self: center;
+        display: grid;
+        place-items: center;
+        width: 56px;
+        height: 56px;
+        margin-top: -26px;
+        border: 0;
+        border-radius: 20px;
+        color: #fff;
+        cursor: pointer;
+        background:
+          radial-gradient(110% 90% at 30% 0%, rgba(255, 255, 255, .6), rgba(255, 255, 255, 0) 60%),
+          linear-gradient(135deg, #FF4D9D 0%, #A855F7 52%, #22D3EE 100%);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, .75),
+          inset 0 -3px 6px rgba(60, 0, 90, .25),
+          0 6px 0 #7C3ACB,
+          0 16px 26px -14px rgba(168, 85, 247, .95);
+        transition: transform 160ms var(--ease), box-shadow 160ms var(--ease);
+      }
+
+      .tabbar__fab:active {
+        transform: translateY(4px);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), 0 1px 0 #6B2FB0, 0 8px 14px -12px rgba(168, 85, 247, .9);
+      }
+    }
+
+    @media (max-width: 400px) {
+      .tabs { width: 100%; }
+      .tab { flex: 1 1 0; padding: 6px 8px; }
+      .feedbar__count { display: none; }
+      .sheet__actions { flex-direction: column; align-items: stretch; }
+      .sheet__actions .btn3d,
+      .sheet__actions .btn-ghost-danger { width: 100%; }
     }
 
     /* ==================================================================
-       15. 尊重系统「减少动态效果」偏好
+       15. 尊重「减少动态效果」
        ================================================================== */
     @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
+      *, *::before, *::after {
         animation-duration: .01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: .01ms !important;
@@ -633,429 +1620,873 @@
 </head>
 
 <body>
-  <div class="app">
-    <!-- 品牌栏 -->
-    <header class="brand">
-      <span class="brand__logo" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="23" height="23" fill="none">
-          <path d="M19 4.2c-4.4.3-8.6 2.4-10.8 5.1-1.3 1.6-2 3.6-2.3 5.6-.1.7.5 1.2 1.2 1 2.1-.5 4.2-1.3 5.8-2.7C15.6 11 17.9 7.4 19 4.2Z"
-                fill="currentColor" opacity=".95" />
-          <path d="M5.2 19.6c1.1-3.3 2.9-5.8 5.5-7.6"
-                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-        </svg>
-      </span>
-      <div class="brand__text">
-        <h1 class="brand__title">太子伴读</h1>
-        <p class="brand__tagline">写下此刻的一点点</p>
+  <!-- 彩色极光背景 -->
+  <div class="aurora" aria-hidden="true">
+    <span class="aurora__blob aurora__blob--1"></span>
+    <span class="aurora__blob aurora__blob--2"></span>
+    <span class="aurora__blob aurora__blob--3"></span>
+    <span class="aurora__blob aurora__blob--4"></span>
+  </div>
+
+  <!-- 顶部栏 -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <div class="brand">
+        <span class="brand__logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+            <path d="M18.8 4.4c-4.2.4-7.9 2.2-9.9 4.7-1.3 1.7-2 3.8-2.2 5.7-.1.7.5 1.2 1.2 1 1.9-.4 4-1.2 5.5-2.5 2.3-1.9 4.3-5.2 5.4-8.9Z"
+                  fill="currentColor" opacity=".96" />
+            <path d="M4.8 20.2c1.2-3.7 3.2-6.4 6-8.4" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" />
+          </svg>
+        </span>
+        <span class="brand__name">太子伴读</span>
+        <span class="brand__badge">PLAZA</span>
       </div>
-    </header>
 
-    <main>
-      <!-- 发布区 -->
-      <section class="card composer" aria-label="发布新的片语">
-        <span class="avatar" aria-hidden="true">伴</span>
+      <label class="search">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="6.4" />
+          <path d="M16 16l4 4" />
+        </svg>
+        <input id="search-input" type="search" placeholder="搜索片语或话题…" autocomplete="off"
+               aria-label="搜索片语或话题" />
+      </label>
 
-        <form class="composer__body" id="composer-form" novalidate>
+      <div class="topbar__actions">
+        <span class="chip">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="4.5" y="10.5" width="15" height="9.5" rx="2.6" />
+            <path d="M8.2 10.5V7.8a3.8 3.8 0 0 1 7.6 0v2.7" />
+          </svg>
+          仅本机
+        </span>
+        <button type="button" class="btn3d btn3d--sm" style="--h: 268" data-nav="write">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+               stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 20h4l10-10a2.8 2.8 0 0 0-4-4L4 16v4Z" />
+            <path d="M13.5 6.5 17.5 10.5" />
+          </svg>
+          写一条
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+    <!-- 左侧导航 -->
+    <aside class="rail" aria-label="我的信息">
+      <section class="card rail__me">
+        <span class="avatar avatar--xl" style="--h: 268">伴</span>
+        <p class="rail__name">太子伴读</p>
+        <p class="rail__bio">写点此刻，留给以后</p>
+        <div class="rail__stats">
+          <div><b id="rail-count">0</b><span>片语</span></div>
+          <div><b id="rail-likes">0</b><span>被赞</span></div>
+        </div>
+      </section>
+
+      <nav class="rail__nav" aria-label="广场导航">
+        <button type="button" class="navitem is-active" data-filter="all">
+          <span class="navitem__icon" style="--h: 268">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                 stroke-width="1.9" stroke-linejoin="round" aria-hidden="true">
+              <rect x="4" y="4" width="7" height="7" rx="2" />
+              <rect x="13" y="4" width="7" height="7" rx="2" />
+              <rect x="4" y="13" width="7" height="7" rx="2" />
+              <rect x="13" y="13" width="7" height="7" rx="2" />
+            </svg>
+          </span>
+          广场
+        </button>
+        <button type="button" class="navitem" data-filter="hot">
+          <span class="navitem__icon" style="--h: 20">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                 stroke-width="1.9" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3s5 4.2 5 9a5 5 0 0 1-10 0c0-1.7.7-3.2 1.7-4.6.4 1.4 1.2 2.2 2.1 2.6C11.4 7.6 12 5.2 12 3Z" />
+            </svg>
+          </span>
+          热门
+        </button>
+        <button type="button" class="navitem" data-nav="write">
+          <span class="navitem__icon" style="--h: 160">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                 stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 20h4l10-10a2.8 2.8 0 0 0-4-4L4 16v4Z" />
+              <path d="M13.5 6.5 17.5 10.5" />
+            </svg>
+          </span>
+          写一条
+        </button>
+      </nav>
+
+      <p class="rail__tip">所有内容仅保存在这台设备的浏览器里。</p>
+    </aside>
+
+    <!-- 主列 -->
+    <main class="feed">
+      <!-- 发布 -->
+      <section class="card composer" id="composer" aria-label="发布新的片语">
+        <div class="composer__head">
+          <span class="avatar avatar--lg" style="--h: 268" aria-hidden="true">伴</span>
+          <div>
+            <p class="composer__title">此刻，想写下什么？</p>
+            <p class="composer__sub">140 字以内 · 只留在本机</p>
+          </div>
+        </div>
+
+        <form id="composer-form" novalidate>
           <label class="visually-hidden" for="composer-input">写下此刻的想法</label>
-          <textarea
-            id="composer-input"
-            class="composer__input"
-            name="content"
-            rows="3"
-            placeholder="此刻在想什么？"
-            aria-describedby="char-counter"></textarea>
+          <textarea id="composer-input" class="composer__input" name="content" rows="3"
+                    placeholder="记录一件小事、一句感叹，或一个突然冒出来的念头…"
+                    aria-describedby="char-counter"></textarea>
 
-          <div class="composer__footer">
-            <span class="composer__counter" id="char-counter" aria-live="polite">还可输入 140 字</span>
-            <button type="submit" class="btn btn--primary" id="publish-btn" aria-busy="false" disabled>
-              <span class="btn__spinner" aria-hidden="true"></span>
-              <span id="publish-label">发布</span>
-            </button>
+          <div class="chips" id="topic-chips" aria-label="快捷话题">
+            <button type="button" class="chip-tag" data-tag="#今日片语">#今日片语</button>
+            <button type="button" class="chip-tag" data-tag="#读书笔记">#读书笔记</button>
+            <button type="button" class="chip-tag" data-tag="#通勤路上">#通勤路上</button>
+            <button type="button" class="chip-tag" data-tag="#深夜书桌">#深夜书桌</button>
+          </div>
+
+          <div class="composer__foot">
+            <div class="counter" id="counter" data-state="normal">
+              <div class="counter__bar" aria-hidden="true"><i class="counter__fill" id="counter-fill"></i></div>
+              <span class="counter__text" id="char-counter" aria-live="polite">还可输入 140 字</span>
+            </div>
+
+            <span class="publish-slot">
+              <button type="submit" class="btn3d btn3d--hero" id="publish-btn" disabled aria-busy="false">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 3 10.5 13.5" />
+                  <path d="M21 3l-6.6 18-3.9-7.5L3 9.6 21 3Z" fill="currentColor" fill-opacity=".18" />
+                </svg>
+                <span id="publish-label">发布</span>
+              </button>
+            </span>
           </div>
         </form>
       </section>
+
+      <!-- 工具条 -->
+      <div class="feedbar">
+        <div class="tabs" role="tablist" aria-label="信息流筛选">
+          <button type="button" class="tab is-active" data-filter="all" role="tab" aria-selected="true">全部</button>
+          <button type="button" class="tab" data-filter="hot" role="tab" aria-selected="false">热门</button>
+        </div>
+        <span class="feedbar__count" id="feed-count" aria-live="polite">0 条片语</span>
+      </div>
 
       <!-- 时间线 -->
       <section aria-label="片语时间线">
         <ul class="timeline" id="timeline" hidden></ul>
 
-        <!-- 空状态：无片语时展示，与列表互斥 -->
         <div class="empty" id="empty-state">
-          <svg class="empty__art" viewBox="0 0 160 120" fill="none" aria-hidden="true"
-               xmlns="http://www.w3.org/2000/svg">
+          <svg class="empty__art" viewBox="0 0 190 140" fill="none" aria-hidden="true">
             <defs>
-              <linearGradient id="empty-page" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#EEF1FF" />
-                <stop offset="1" stop-color="#FFFFFF" />
+              <linearGradient id="e-card" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#FFF3F9" />
+                <stop offset="1" stop-color="#F1F4FF" />
+              </linearGradient>
+              <linearGradient id="e-plane" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#FF4D9D" />
+                <stop offset=".55" stop-color="#A855F7" />
+                <stop offset="1" stop-color="#22D3EE" />
+              </linearGradient>
+              <linearGradient id="e-bar" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#FFC7E2" />
+                <stop offset="1" stop-color="#D8CBFF" />
               </linearGradient>
             </defs>
-
-            <!-- 信纸 -->
-            <rect x="26" y="22" width="84" height="82" rx="12"
-                  fill="url(#empty-page)" stroke="#E5E8EF" />
-            <path d="M42 46h40M42 60h52M42 74h30" stroke="#C7D0E8" stroke-width="3"
-                  stroke-linecap="round" />
-
-            <!-- 虚线飞行轨迹 -->
-            <path d="M78 96c14-6 26-16 32-28" stroke="#C7D0E8" stroke-width="2"
-                  stroke-linecap="round" stroke-dasharray="1 7" />
-
-            <!-- 纸飞机 -->
-            <path d="M124 24l26-11-12 28-5-12-9-5z" fill="#EEF1FF" stroke="#3B5BFE"
-                  stroke-width="2" stroke-linejoin="round" />
-            <path d="M150 13l-17 16" stroke="#3B5BFE" stroke-width="2" stroke-linecap="round" />
-
-            <!-- 点缀圆点 -->
-            <circle cx="132" cy="74" r="3" fill="#C7D0E8" />
-            <circle cx="146" cy="60" r="2" fill="#DDE3F2" />
+            <rect x="26" y="22" width="96" height="96" rx="20" fill="url(#e-card)" stroke="#F0E8FA" />
+            <rect x="42" y="44" width="46" height="6" rx="3" fill="url(#e-bar)" />
+            <rect x="42" y="60" width="62" height="6" rx="3" fill="#E6E4F6" />
+            <rect x="42" y="76" width="38" height="6" rx="3" fill="#E6E4F6" />
+            <circle cx="52" cy="100" r="6" fill="#FFE0EF" />
+            <circle cx="68" cy="100" r="6" fill="#E4EAFE" />
+            <path d="M150 26l24-10-11 26-4-11-9-5z" fill="url(#e-plane)" />
+            <path d="M174 16l-16 15" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity=".8" />
+            <circle cx="128" cy="96" r="4" fill="#FFD9EA" />
+            <circle cx="146" cy="112" r="2.6" fill="#DCE4FA" />
+            <circle cx="120" cy="14" r="3" fill="#E9E1FF" />
+            <path d="M96 118c10-4 18-10 22-18" stroke="#E6DEF6" stroke-width="2" stroke-linecap="round"
+                  stroke-dasharray="1 7" />
           </svg>
-
-          <p class="empty__title">还没有只言片语</p>
-          <p class="empty__desc">写下此刻的一点点，它就会出现在这里。</p>
+          <p class="empty__title" id="empty-title">这里还很安静</p>
+          <p class="empty__desc" id="empty-desc">写下此刻的一点点，它就会落在五彩的广场上。</p>
         </div>
       </section>
+
+      <footer class="page-footer">
+        <p>内容仅保存在此浏览器 · 太子伴读</p>
+      </footer>
     </main>
 
-    <footer class="page-footer">
-      <p>内容仅保存在此浏览器 · 太子伴读</p>
-    </footer>
+    <!-- 右侧热议 -->
+    <aside class="side" aria-label="此刻热议">
+      <section class="card side__card">
+        <div class="side__head">
+          <h2>此刻热议</h2>
+          <span class="pulse-dot" aria-hidden="true"></span>
+        </div>
+        <ol class="topics" id="topic-list"></ol>
+      </section>
+
+      <section class="card side__card side__note">
+        <div class="side__head">
+          <h2>玩法提示</h2>
+        </div>
+        <p>点卡片右下角的<strong>「查看」</strong>立体按钮，可以展开全文、点赞或删除；数据全部存在浏览器本地。</p>
+      </section>
+    </aside>
   </div>
 
-  <!-- 删除二次确认弹窗 -->
-  <div class="modal" id="confirm-modal" hidden>
-    <div class="modal__backdrop" data-close="backdrop"></div>
-    <div class="modal__panel" role="dialog" aria-modal="true"
-         aria-labelledby="confirm-title" aria-describedby="confirm-desc">
-      <h2 class="modal__title" id="confirm-title">删除这条片语？</h2>
-      <p class="modal__desc" id="confirm-desc">删除后无法恢复，内容将从这台设备上移除。</p>
-      <div class="modal__actions">
-        <button type="button" class="btn btn--ghost" id="cancel-delete">取消</button>
-        <button type="button" class="btn btn--danger" id="confirm-delete">删除</button>
+  <!-- 移动端底栏 -->
+  <nav class="tabbar" aria-label="底部导航">
+    <button type="button" class="tabbar__item is-active" data-nav="all">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9"
+           stroke-linejoin="round" aria-hidden="true">
+        <rect x="4" y="4" width="7" height="7" rx="2" />
+        <rect x="13" y="4" width="7" height="7" rx="2" />
+        <rect x="4" y="13" width="7" height="7" rx="2" />
+        <rect x="13" y="13" width="7" height="7" rx="2" />
+      </svg>
+      广场
+    </button>
+    <button type="button" class="tabbar__item" data-nav="hot">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9"
+           stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 3s5 4.2 5 9a5 5 0 0 1-10 0c0-1.7.7-3.2 1.7-4.6.4 1.4 1.2 2.2 2.1 2.6C11.4 7.6 12 5.2 12 3Z" />
+      </svg>
+      热门
+    </button>
+    <button type="button" class="tabbar__fab" data-nav="write" aria-label="发布新的片语">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4"
+           stroke-linecap="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+    </button>
+    <button type="button" class="tabbar__item" data-nav="search">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9"
+           stroke-linecap="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="6.4" />
+        <path d="M16 16l4 4" />
+      </svg>
+      搜索
+    </button>
+    <button type="button" class="tabbar__item" data-nav="top">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 19V5M6 11l6-6 6 6" />
+      </svg>
+      顶部
+    </button>
+  </nav>
+
+  <!-- 查看详情 -->
+  <div class="modal" id="detail-modal" hidden>
+    <div class="modal__backdrop" data-close-detail></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="detail-name">
+      <div class="sheet__banner" id="detail-banner"></div>
+      <button type="button" class="sheet__close" data-close-detail aria-label="关闭详情">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </button>
+
+      <div class="sheet__body">
+        <div class="sheet__head">
+          <span class="avatar avatar--lg" id="detail-avatar" style="--h: 268" aria-hidden="true">伴</span>
+          <div class="sheet__who">
+            <p class="sheet__name" id="detail-name">太子伴读</p>
+            <p class="sheet__meta" id="detail-meta">刚刚 · 来自本机</p>
+          </div>
+        </div>
+
+        <p class="sheet__content" id="detail-content"></p>
+
+        <div class="sheet__stats">
+          <div><b id="detail-chars">0</b><span>字数</span></div>
+          <div><b id="detail-likes">0</b><span>获赞</span></div>
+          <div><b id="detail-date">—</b><span>发布</span></div>
+        </div>
+
+        <div class="sheet__actions">
+          <button type="button" class="btn3d btn3d--sm" id="detail-like" data-detail-action="like"
+                  style="--h: 340">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 20s-7-4.4-7-9.2A4.2 4.2 0 0 1 12 7.6a4.2 4.2 0 0 1 7 3.2C19 15.6 12 20 12 20Z" />
+            </svg>
+            <span id="detail-like-label">点赞</span>
+          </button>
+
+          <button type="button" class="btn3d btn3d--sm btn3d--ghost" data-detail-action="copy" style="--h: 225">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                 stroke-width="1.9" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="9" width="10.5" height="10.5" rx="2.6" />
+              <path d="M15 5.5A2.5 2.5 0 0 0 12.5 3h-6A2.5 2.5 0 0 0 4 5.5v6A2.5 2.5 0 0 0 6.5 14" />
+            </svg>
+            复制全文
+          </button>
+
+          <button type="button" class="btn-ghost-danger" data-detail-action="delete">删除</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- 轻提示：用于本地存储不可用等降级场景 -->
+  <!-- 删除确认 -->
+  <div class="modal" id="confirm-modal" hidden style="z-index: 88">
+    <div class="modal__backdrop" data-close-confirm></div>
+    <div class="confirm" role="dialog" aria-modal="true" aria-labelledby="confirm-title"
+         aria-describedby="confirm-desc">
+      <span class="confirm__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 7h16" />
+          <path d="M9.6 7V5.5c0-.8.65-1.5 1.45-1.5h1.9c.8 0 1.45.7 1.45 1.5V7" />
+          <path d="M6.6 7l.8 11.2c.06.8.72 1.3 1.5 1.3h6.2c.78 0 1.44-.5 1.5-1.3L17.4 7" />
+          <path d="M10.6 11v5M13.4 11v5" />
+        </svg>
+      </span>
+      <h2 class="confirm__title" id="confirm-title">删除这条片语？</h2>
+      <p class="confirm__desc" id="confirm-desc">删除后无法恢复，内容会从这台设备上移除。</p>
+      <div class="confirm__actions">
+        <button type="button" class="btn-flat" id="cancel-delete">再想想</button>
+        <button type="button" class="btn-danger" id="confirm-delete">删除</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <noscript>
+    <p style="text-align:center;padding:24px">请开启 JavaScript，才能发布与查看片语。</p>
+  </noscript>
 
   <script>
     (function () {
       'use strict';
 
       /* ================================================================
-         一、常量与 DOM 引用
+         一、常量与 DOM
          ================================================================ */
-      const STORAGE_KEY = 'taizi.feed.v1';   // 带版本号的键名，便于将来结构升级
-      const STORAGE_VERSION = 1;
-      const MAX_LENGTH = 140;                // 单条片语的字数上限
-      const TIME_REFRESH_INTERVAL = 30 * 1000; // 相对时间的自动刷新间隔
-      const PUBLISH_DELAY = 420;             // 模拟提交耗时，让加载态可被感知
-      const WARN_THRESHOLD = 20;             // 剩余字数进入告警阈值
+      const STORAGE_KEY = 'taizi.feed.v2';
+      const MAX_LENGTH = 140;
+      const PUBLISH_DELAY = 360;
+      const TIME_REFRESH = 30000;
 
       const dom = {
         form: document.getElementById('composer-form'),
         input: document.getElementById('composer-input'),
-        counter: document.getElementById('char-counter'),
+        counter: document.getElementById('counter'),
+        counterFill: document.getElementById('counter-fill'),
+        counterText: document.getElementById('char-counter'),
         publishBtn: document.getElementById('publish-btn'),
         publishLabel: document.getElementById('publish-label'),
+        composer: document.getElementById('composer'),
         timeline: document.getElementById('timeline'),
-        emptyState: document.getElementById('empty-state'),
-        modal: document.getElementById('confirm-modal'),
-        cancelDeleteBtn: document.getElementById('cancel-delete'),
-        confirmDeleteBtn: document.getElementById('confirm-delete'),
+        empty: document.getElementById('empty-state'),
+        emptyTitle: document.getElementById('empty-title'),
+        emptyDesc: document.getElementById('empty-desc'),
+        feedCount: document.getElementById('feed-count'),
+        railCount: document.getElementById('rail-count'),
+        railLikes: document.getElementById('rail-likes'),
+        topicList: document.getElementById('topic-list'),
+        search: document.getElementById('search-input'),
+        tabs: Array.from(document.querySelectorAll('.tab')),
+        detailModal: document.getElementById('detail-modal'),
+        detailBanner: document.getElementById('detail-banner'),
+        detailAvatar: document.getElementById('detail-avatar'),
+        detailName: document.getElementById('detail-name'),
+        detailMeta: document.getElementById('detail-meta'),
+        detailContent: document.getElementById('detail-content'),
+        detailChars: document.getElementById('detail-chars'),
+        detailLikes: document.getElementById('detail-likes'),
+        detailDate: document.getElementById('detail-date'),
+        detailLike: document.getElementById('detail-like'),
+        detailLikeLabel: document.getElementById('detail-like-label'),
+        confirmModal: document.getElementById('confirm-modal'),
+        cancelDelete: document.getElementById('cancel-delete'),
+        confirmDelete: document.getElementById('confirm-delete'),
         toast: document.getElementById('toast'),
       };
 
       /* ================================================================
          二、状态
-         posts 是唯一数据源，始终按 createdAt 倒序（新帖在前）维护
          ================================================================ */
       let posts = [];
-      let pendingDeleteId = null;    // 等待用户确认删除的帖子 id
-      let lastFocusedElement = null; // 打开弹窗前的焦点元素，关闭后归位
-
-      let submitting = false;   // 发布请求进行中，用于防重复提交
-      let wasOverLimit = false; // 上一次输入是否已超限，用于触发抖动动画
+      let filter = 'all';        // all | hot
+      let keyword = '';          // 搜索词（含 #）
+      let viewingId = null;      // 详情弹层正在展示的片语
+      let pendingDeleteId = null;
+      let submitting = false;
+      let lastFocused = null;
       let toastTimer = null;
 
       /* ================================================================
-         三、存储层：与 localStorage 打交道，不触碰 DOM
+         三、存储层
          ================================================================ */
+      const DEFAULT_TOPICS = ['#今日片语', '#读书笔记', '#通勤路上', '#深夜书桌', '#周末计划'];
 
-      /** 读取本地数据；任何异常都降级为空数组，绝不阻塞页面使用 */
+      /* 每条片语从调色板里取一个色相，保证前后两条颜色不一样 */
+      const PALETTE = [340, 268, 205, 158, 35, 12, 300];
+
+      function createSeedPosts() {
+        const now = Date.now();
+        return [
+          {
+            id: 'seed-1',
+            content: '清晨六点半的操场，风把梧桐叶翻得像书页。今天也要好好读书呀。#今日片语',
+            createdAt: now - 12 * 60 * 1000,
+            likes: 12,
+            liked: false,
+            hue: 340,
+          },
+          {
+            id: 'seed-2',
+            content: '把《长安的荔枝》读完了，合上书那一刻忽然很饿。\n原来最动人的永远是那些笨拙又认真的坚持。#读书笔记',
+            createdAt: now - 3 * 60 * 60 * 1000,
+            likes: 8,
+            liked: false,
+            hue: 158,
+          },
+          {
+            id: 'seed-3',
+            content: '地铁上听到两个小朋友认真讨论宇宙的尽头，比任何播客都精彩。#通勤路上',
+            createdAt: now - 26 * 60 * 60 * 1000,
+            likes: 21,
+            liked: false,
+            hue: 205,
+          },
+        ];
+      }
+
       function loadPosts() {
+        let raw = null;
         try {
-          const raw = window.localStorage.getItem(STORAGE_KEY);
-          if (!raw) return [];
+          raw = window.localStorage.getItem(STORAGE_KEY);
+        } catch (error) {
+          console.warn('[太子伴读] localStorage 不可用，本次以内存数据演示：', error);
+          return createSeedPosts().sort(byNewest);
+        }
 
+        if (raw === null) {
+          const seeded = createSeedPosts();
+          try {
+            window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 2, posts: seeded }));
+          } catch (error) {
+            console.warn('[太子伴读] 写入示例数据失败：', error);
+          }
+          return seeded.sort(byNewest);
+        }
+
+        try {
           const parsed = JSON.parse(raw);
-          // 兼容两种历史形态：直接存数组，或存 { version, posts }
           const list = Array.isArray(parsed)
             ? parsed
             : (parsed && Array.isArray(parsed.posts) ? parsed.posts : []);
-
-          return list
-            .map(normalizePost)
-            .filter(Boolean)
-            .sort((a, b) => b.createdAt - a.createdAt);
+          return list.map(normalizePost).filter(Boolean).sort(byNewest);
         } catch (error) {
-          console.warn('[太子伴读] 读取本地数据失败，已降级为本次会话内存态：', error);
+          console.warn('[太子伴读] 本地数据解析失败，已降级为空列表：', error);
           return [];
         }
       }
 
-      /** 写入本地数据，返回是否成功（隐私模式 / 超出配额时会失败） */
       function savePosts() {
         try {
-          window.localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify({ version: STORAGE_VERSION, posts: posts })
-          );
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 2, posts: posts }));
           return true;
         } catch (error) {
-          console.warn('[太子伴读] 保存到本地失败（可能处于隐私模式或存储已满）：', error);
+          console.warn('[太子伴读] 保存失败（隐私模式或存储已满）：', error);
           return false;
         }
       }
 
-      /**
-       * 校验并补齐单条数据，保证后续渲染逻辑拿到的字段一定合法
-       * @param {any} raw 原始存储数据
-       * @returns {{id:string, content:string, createdAt:number, author:object, stats:object}|null}
-       */
       function normalizePost(raw) {
         if (!raw || typeof raw !== 'object') return null;
 
         const content = typeof raw.content === 'string' ? raw.content : '';
-        if (!content.trim()) return null; // 丢弃空内容，避免时间线出现空白卡片
+        if (!content.trim()) return null;
 
-        const timestamp = Number(raw.createdAt);
+        const created = Number(raw.createdAt);
+        const likes = Number(raw.likes);
+
         return {
           id: typeof raw.id === 'string' && raw.id ? raw.id : generateId(),
-          content,
-          createdAt: Number.isFinite(timestamp) && timestamp > 0 ? timestamp : Date.now(),
-          // 以下字段为未来扩展预留（昵称、点赞、回复等），当前仅作展示兜底
-          author: raw.author && typeof raw.author === 'object' ? raw.author : { name: '我' },
-          stats: raw.stats && typeof raw.stats === 'object' ? raw.stats : { likes: 0, replies: 0 },
+          content: content.slice(0, 1000),
+          createdAt: Number.isFinite(created) && created > 0 ? created : Date.now(),
+          likes: Number.isFinite(likes) && likes > 0 ? Math.floor(likes) : 0,
+          liked: raw.liked === true,
+          hue: Number.isFinite(Number(raw.hue))
+            ? ((Math.round(Number(raw.hue)) % 360) + 360) % 360
+            : hueFor(raw.id || content),
         };
       }
 
       /* ================================================================
-         四、工具层：纯函数，无副作用
+         四、工具函数
          ================================================================ */
+      function byNewest(a, b) { return b.createdAt - a.createdAt; }
 
-      /** 生成唯一 id；优先使用原生 crypto，旧浏览器降级为时间戳 + 随机串 */
       function generateId() {
         if (window.crypto && typeof window.crypto.randomUUID === 'function') {
           return window.crypto.randomUUID();
         }
-        return 'p_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+        return 'p_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 9);
       }
 
-      /**
-       * 按 Unicode 码点统计字数
-       * 用 Array.from 而非 .length，可避免中文与 emoji 被算成多个字
-       */
-      function countChars(text) {
-        return Array.from(text).length;
+      function countChars(text) { return Array.from(text).length; }
+
+      /** 由 id / 文本派生稳定色相（FNV-1a，散列均匀），让每条片语都有自己的一抹颜色 */
+      function hueFor(seed) {
+        const text = String(seed);
+        let hash = 2166136261;
+        for (let i = 0; i < text.length; i++) {
+          hash ^= text.charCodeAt(i);
+          hash = Math.imul(hash, 16777619);
+        }
+        return Math.abs(hash) % 360;
       }
 
-      /**
-       * 时间戳 → 相对时间文案
-       * 刚刚 / N 分钟前 / N 小时前 / N 天前 / 具体日期
-       */
+      /** 取片语自身的色相，旧数据没有 hue 时退回按 id 计算 */
+      function hueOf(post) {
+        return Number.isFinite(post.hue) ? post.hue : hueFor(post.id);
+      }
+
       function formatRelativeTime(timestamp) {
         const diff = Date.now() - timestamp;
-        if (diff < 0) return '刚刚'; // 本机时间回拨时兜底
+        if (diff < 0) return '刚刚';
 
-        const MINUTE = 60 * 1000;
-        const HOUR = 60 * MINUTE;
-        const DAY = 24 * HOUR;
-
+        const MINUTE = 60000, HOUR = 60 * MINUTE, DAY = 24 * HOUR;
         if (diff < MINUTE) return '刚刚';
         if (diff < HOUR) return Math.floor(diff / MINUTE) + ' 分钟前';
         if (diff < DAY) return Math.floor(diff / HOUR) + ' 小时前';
         if (diff < 30 * DAY) return Math.floor(diff / DAY) + ' 天前';
 
         const date = new Date(timestamp);
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
         const sameYear = date.getFullYear() === new Date().getFullYear();
-        return sameYear
-          ? month + ' 月 ' + day + ' 日'
-          : date.getFullYear() + ' 年 ' + month + ' 月 ' + day + ' 日';
+        return (sameYear ? '' : date.getFullYear() + ' 年 ') +
+          (date.getMonth() + 1) + ' 月 ' + date.getDate() + ' 日';
       }
 
-      /* ================================================================
-         五、渲染层：只负责把数据变成 DOM
-         ================================================================ */
-
-      /**
-       * 创建一条片语卡片
-       * 关键：用户内容一律写入 textContent，绝不拼接进 innerHTML，从根源杜绝 XSS
-       * @param {object} post
-       * @returns {HTMLLIElement}
-       */
-      function createPostElement(post) {
-        const item = document.createElement('li');
-        item.className = 'post card';
-        item.dataset.id = post.id;
-
-        const avatar = document.createElement('span');
-        avatar.className = 'avatar post__avatar';
-        avatar.setAttribute('aria-hidden', 'true');
-        avatar.textContent = (post.author && post.author.name ? post.author.name : '我').slice(0, 1) || '伴';
-
-        const main = document.createElement('div');
-        main.className = 'post__main';
-
-        const head = document.createElement('div');
-        head.className = 'post__head';
-
-        const author = document.createElement('span');
-        author.className = 'post__author';
-        author.textContent = (post.author && post.author.name) || '我';
-
-        const dot = document.createElement('span');
-        dot.className = 'post__dot';
-        dot.textContent = '·';
-
-        const time = document.createElement('time');
-        time.className = 'post__time';
-        time.dateTime = new Date(post.createdAt).toISOString();
-        time.dataset.time = String(post.createdAt); // 供定时刷新读取，避免遍历数据数组
-        time.textContent = formatRelativeTime(post.createdAt);
-
-        const body = document.createElement('p');
-        body.className = 'post__body';
-        body.textContent = post.content;
-
-        const removeBtn = document.createElement('button');
-        removeBtn.type = 'button';
-        removeBtn.className = 'icon-btn post__delete';
-        removeBtn.dataset.action = 'delete';
-        removeBtn.setAttribute('aria-label', '删除这条片语');
-        removeBtn.title = '删除';
-        // 固定不变的图标骨架才使用 innerHTML，字符串中不含任何用户数据
-        removeBtn.innerHTML =
-          '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" ' +
-          'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-          '<path d="M4 7h16"/>' +
-          '<path d="M9.6 7V5.5c0-.8.65-1.5 1.45-1.5h1.9c.8 0 1.45.7 1.45 1.5V7"/>' +
-          '<path d="M6.6 7l.8 11.2c.06.8.72 1.3 1.5 1.3h6.2c.78 0 1.44-.5 1.5-1.3L17.4 7"/>' +
-          '<path d="M10.6 11v5M13.4 11v5"/></svg>';
-
-        head.append(author, dot, time, removeBtn);
-        main.append(head, body);
-        item.append(avatar, main);
-        return item;
+      function formatDate(timestamp) {
+        const date = new Date(timestamp);
+        const pad = (n) => (n < 10 ? '0' + n : String(n));
+        return date.getFullYear() + '.' + pad(date.getMonth() + 1) + '.' + pad(date.getDate());
       }
 
-      /** 全量渲染：仅在首屏与数据整体变化时调用，用 DocumentFragment 减少回流 */
-      function renderTimeline() {
+      function extractTags(text) {
+        const matches = text.match(/#[^\s#，。！？,.!?]{1,24}/g);
+        return matches ? Array.from(new Set(matches)) : [];
+      }
+
+      /** 把正文里的 #话题 变成彩色标签；文本一律走 textContent，不拼 HTML */
+      function fillContent(node, text) {
         const fragment = document.createDocumentFragment();
-        posts.forEach((post) => fragment.appendChild(createPostElement(post)));
-        dom.timeline.replaceChildren(fragment);
+        const parts = text.split(/(#[^\s#，。！？,.!?]{1,24})/g);
+
+        parts.forEach((part) => {
+          if (!part) return;
+          if (part.charAt(0) === '#' && part.length > 1) {
+            const tag = document.createElement('span');
+            tag.className = 'tag';
+            tag.textContent = part;
+            fragment.appendChild(tag);
+          } else {
+            fragment.appendChild(document.createTextNode(part));
+          }
+        });
+
+        node.replaceChildren(fragment);
       }
 
-      /** 增量渲染：新帖直接插到列表顶部，保留输入焦点且不重建整列表 */
-      function prependPost(post) {
-        const element = createPostElement(post);
-        // 仅新插入的卡片播放入场动画，首屏渲染时不会集体闪动
-        element.classList.add('is-entering');
-        element.addEventListener(
-          'animationend',
-          () => element.classList.remove('is-entering'),
-          { once: true }
-        );
-
-        dom.timeline.prepend(element);
-        syncEmptyState();
-      }
-
-      /** 移除一条卡片：先播放淡出，再摘除节点 */
-      function removePostElement(postId) {
-        const item = Array.from(dom.timeline.children).find((node) => node.dataset.id === postId);
-        if (!item) {
-          syncEmptyState();
-          return;
+      function copyText(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+          return navigator.clipboard.writeText(text);
         }
-
-        let finalized = false;
-        const finalize = () => {
-          if (finalized) return;
-          finalized = true;
-          item.remove();
-          syncEmptyState(); // 等节点真正移除后再切换空状态，避免打断淡出动画
-        };
-
-        item.classList.add('is-leaving');
-        item.addEventListener('transitionend', finalize, { once: true });
-        window.setTimeout(finalize, 260); // 兜底：动画被禁用时也能正常移除
-      }
-
-      /** 列表与空状态互斥切换 */
-      function syncEmptyState() {
-        const isEmpty = posts.length === 0;
-        dom.timeline.hidden = isEmpty;
-        dom.emptyState.hidden = !isEmpty;
-      }
-
-      /** 只更新已渲染卡片上的时间文案，不重建 DOM */
-      function refreshTimes() {
-        if (document.visibilityState === 'hidden') return; // 页面不可见时不做无用功
-        dom.timeline.querySelectorAll('time[data-time]').forEach((node) => {
-          const timestamp = Number(node.dataset.time);
-          if (Number.isFinite(timestamp)) node.textContent = formatRelativeTime(timestamp);
+        return new Promise((resolve, reject) => {
+          const area = document.createElement('textarea');
+          area.value = text;
+          area.setAttribute('readonly', '');
+          area.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+          document.body.appendChild(area);
+          area.select();
+          try {
+            document.execCommand('copy') ? resolve() : reject(new Error('copy failed'));
+          } catch (error) {
+            reject(error);
+          } finally {
+            area.remove();
+          }
         });
       }
 
       /* ================================================================
-         六、交互层
+         五、渲染
          ================================================================ */
+      function getVisiblePosts() {
+        let list = posts.slice();
 
-      /** 输入框随内容自动增高（上限由 CSS max-height 兜住） */
-      function autoResizeInput() {
-        dom.input.style.height = 'auto';
-        dom.input.style.height = dom.input.scrollHeight + 'px';
+        if (keyword) {
+          const key = keyword.toLowerCase();
+          list = list.filter((post) => post.content.toLowerCase().indexOf(key) !== -1);
+        }
+
+        if (filter === 'hot') {
+          list.sort((a, b) => (b.likes - a.likes) || (b.createdAt - a.createdAt));
+        } else {
+          list.sort(byNewest);
+        }
+
+        return list;
       }
 
-      /** 根据当前输入同步「剩余字数 + 发布按钮可用状态」 */
-      function updateComposerState() {
-        const value = dom.input.value;
-        const remaining = MAX_LENGTH - countChars(value);
-        const isOver = remaining < 0;
+      function createCard(post) {
+        const hue = hueOf(post);
+        const item = document.createElement('li');
+        item.className = 'post card';
+        item.dataset.id = post.id;
+        item.style.setProperty('--h', hue);
 
-        dom.counter.textContent = isOver
+        const avatar = document.createElement('span');
+        avatar.className = 'avatar avatar--md';
+        avatar.style.setProperty('--h', hue);
+        avatar.setAttribute('aria-hidden', 'true');
+        avatar.textContent = '伴';
+
+        const main = document.createElement('div');
+        main.className = 'post__main';
+
+        /* --- 头部 --- */
+        const head = document.createElement('div');
+        head.className = 'post__head';
+
+        const who = document.createElement('div');
+        who.className = 'post__who';
+
+        const name = document.createElement('span');
+        name.className = 'post__name';
+        name.textContent = '太子伴读';
+
+        const verified = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        verified.setAttribute('viewBox', '0 0 24 24');
+        verified.setAttribute('width', '13');
+        verified.setAttribute('height', '13');
+        verified.setAttribute('fill', 'currentColor');
+        verified.setAttribute('aria-hidden', 'true');
+        const badgePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        badgePath.setAttribute('d', 'M12 2.6l2.3 1.7 2.8-.2 1 2.7 2.3 1.7-1 2.7 1 2.7-2.3 1.7-1 2.7-2.8-.2L12 21.4l-2.3-1.7-2.8.2-1-2.7L3.6 15.5l1-2.7-1-2.7L5.9 8.4l1-2.7 2.8.2L12 2.6Zm-.2 12.6l4.3-4.4-1.4-1.4-2.9 3-1.4-1.4-1.4 1.4 2.8 2.8Z');
+        verified.appendChild(badgePath);
+        name.appendChild(verified);
+
+        const meta = document.createElement('span');
+        meta.className = 'post__meta';
+        const time = document.createElement('time');
+        time.dateTime = new Date(post.createdAt).toISOString();
+        time.dataset.time = String(post.createdAt);
+        time.textContent = formatRelativeTime(post.createdAt);
+        meta.append(time, document.createTextNode(' · 来自本机'));
+
+        who.append(name, meta);
+
+        const badge = document.createElement('span');
+        badge.className = 'post__badge';
+        badge.textContent = post.liked ? '已赞' : '片语';
+
+        head.append(avatar, who, badge);
+
+        /* --- 正文 --- */
+        const body = document.createElement('p');
+        body.className = 'post__body';
+        fillContent(body, post.content);
+
+        /* --- 操作栏 --- */
+        const actions = document.createElement('div');
+        actions.className = 'post__actions';
+
+        const like = document.createElement('button');
+        like.type = 'button';
+        like.className = 'like-btn' + (post.liked ? ' is-liked' : '');
+        like.dataset.action = 'like';
+        like.setAttribute('aria-pressed', String(post.liked));
+        like.setAttribute('aria-label', post.liked ? '取消点赞' : '点赞');
+        like.innerHTML =
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" ' +
+          'stroke-width="2" stroke-linejoin="round" aria-hidden="true">' +
+          '<path d="M12 20s-7-4.4-7-9.2A4.2 4.2 0 0 1 12 7.6a4.2 4.2 0 0 1 7 3.2C19 15.6 12 20 12 20Z"/></svg>' +
+          '<span>' + post.likes + '</span>';
+        actions.appendChild(like);
+
+        const copy = document.createElement('button');
+        copy.type = 'button';
+        copy.className = 'ghost-btn';
+        copy.dataset.action = 'copy';
+        copy.textContent = '复制';
+        actions.appendChild(copy);
+
+        /* --- 3D「查看」按钮 --- */
+        const view = document.createElement('button');
+        view.type = 'button';
+        view.className = 'btn3d btn3d--mini';
+        view.dataset.action = 'view';
+        view.setAttribute('aria-label', '查看这条片语的详情');
+        view.innerHTML =
+          '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" ' +
+          'stroke-width="2" stroke-linejoin="round" aria-hidden="true">' +
+          '<path d="M2.6 12S6 5.8 12 5.8 21.4 12 21.4 12 18 18.2 12 18.2 2.6 12 2.6 12Z"/>' +
+          '<circle cx="12" cy="12" r="2.7"/></svg>' +
+          '<span>查看</span>';
+        actions.appendChild(view);
+
+        main.append(head, body, actions);
+        item.append(avatar, main);
+        return item;
+      }
+
+      function renderTimeline(options) {
+        const animateFirst = !!(options && options.animateFirst);
+        const list = getVisiblePosts();
+        const fragment = document.createDocumentFragment();
+
+        list.forEach((post) => fragment.appendChild(createCard(post)));
+        dom.timeline.replaceChildren(fragment);
+
+        const isEmpty = list.length === 0;
+        dom.timeline.hidden = isEmpty;
+        dom.empty.hidden = !isEmpty;
+
+        if (isEmpty) {
+          if (keyword) {
+            dom.emptyTitle.textContent = '没有找到相关片语';
+            dom.emptyDesc.textContent = '换个关键词试试，或者清空搜索看看全部内容。';
+          } else {
+            dom.emptyTitle.textContent = '这里还很安静';
+            dom.emptyDesc.textContent = '写下此刻的一点点，它就会落在五彩的广场上。';
+          }
+        } else if (animateFirst) {
+          const first = dom.timeline.firstElementChild;
+          if (first) {
+            first.classList.add('is-entering');
+            first.addEventListener('animationend',
+              () => first.classList.remove('is-entering'), { once: true });
+          }
+        }
+
+        syncStats(list.length);
+      }
+
+      function syncStats(visibleCount) {
+        const total = posts.length;
+        const likes = posts.reduce((sum, post) => sum + post.likes, 0);
+
+        if (dom.railCount) dom.railCount.textContent = String(total);
+        if (dom.railLikes) dom.railLikes.textContent = String(likes);
+
+        if (keyword) {
+          dom.feedCount.textContent = '找到 ' + visibleCount + ' 条';
+        } else if (filter === 'hot') {
+          dom.feedCount.textContent = '热门 ' + visibleCount + ' 条';
+        } else {
+          dom.feedCount.textContent = total + ' 条片语';
+        }
+      }
+
+      /** 热议榜：从片语里的 #话题 统计，数量不足时用默认话题补齐 */
+      function renderTopics() {
+        const counter = new Map();
+        posts.forEach((post) => {
+          extractTags(post.content).forEach((tag) => {
+            counter.set(tag, (counter.get(tag) || 0) + 1);
+          });
+        });
+
+        const list = Array.from(counter.entries())
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5);
+
+        const fallback = DEFAULT_TOPICS.filter((tag) => !counter.has(tag));
+        while (list.length < 5 && fallback.length) {
+          list.push([fallback.shift(), 0]);
+        }
+
+        const hues = [340, 268, 225, 190, 45];
+        const fragment = document.createDocumentFragment();
+
+        list.forEach((entry, index) => {
+          const li = document.createElement('li');
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'topic';
+          btn.dataset.topic = entry[0];
+
+          const rank = document.createElement('span');
+          rank.className = 'topic__rank';
+          rank.style.setProperty('--h', hues[index] || 268);
+          rank.textContent = String(index + 1);
+
+          const name = document.createElement('span');
+          name.className = 'topic__name';
+          name.textContent = entry[0];
+
+          const count = document.createElement('span');
+          count.className = 'topic__count';
+          count.textContent = entry[1] > 0 ? entry[1] + ' 条' : '待开启';
+
+          btn.append(rank, name, count);
+          li.appendChild(btn);
+          fragment.appendChild(li);
+        });
+
+        dom.topicList.replaceChildren(fragment);
+      }
+
+      function refreshTimes() {
+        if (document.visibilityState === 'hidden') return;
+        dom.timeline.querySelectorAll('time[data-time]').forEach((node) => {
+          const stamp = Number(node.dataset.time);
+          if (Number.isFinite(stamp)) node.textContent = formatRelativeTime(stamp);
+        });
+      }
+
+      /* ================================================================
+         六、发布
+         ================================================================ */
+      function autoResize() {
+        dom.input.style.height = 'auto';
+        dom.input.style.height = Math.min(dom.input.scrollHeight, 260) + 'px';
+      }
+
+      function updateComposer() {
+        const value = dom.input.value;
+        const length = countChars(value);
+        const remaining = MAX_LENGTH - length;
+        const isOver = remaining < 0;
+        const state = isOver ? 'over' : (remaining <= 20 ? 'warn' : 'normal');
+
+        dom.counter.dataset.state = state;
+        dom.counterFill.style.width = Math.min(length / MAX_LENGTH * 100, 100) + '%';
+        dom.counterText.textContent = isOver
           ? '已超出 ' + Math.abs(remaining) + ' 字'
           : '还可输入 ' + remaining + ' 字';
-        dom.counter.dataset.state = isOver ? 'over' : (remaining <= WARN_THRESHOLD ? 'warn' : 'normal');
 
-        // 刚跨过上限时抖动一次，给出"发不出去"的即时反馈
-        if (isOver && !wasOverLimit) {
-          dom.counter.classList.remove('is-shake');
-          void dom.counter.offsetWidth; // 强制回流，让动画可重复触发
-          dom.counter.classList.add('is-shake');
-        }
-        wasOverLimit = isOver;
-
-        // 空内容、超出上限或正在提交时都禁止发布
         dom.publishBtn.disabled = submitting || isOver || value.trim() === '';
-
-        autoResizeInput();
+        autoResize();
       }
 
-      /** 切换发布按钮的加载态（同时锁定输入框，避免提交中被改写） */
-      function setSubmitting(isSubmitting) {
-        submitting = isSubmitting;
-        dom.publishBtn.classList.toggle('is-loading', isSubmitting);
-        dom.publishBtn.setAttribute('aria-busy', String(isSubmitting));
-        dom.publishLabel.textContent = isSubmitting ? '发布中' : '发布';
-        dom.input.readOnly = isSubmitting;
-        updateComposerState();
+      function setSubmitting(flag) {
+        submitting = flag;
+        dom.publishBtn.classList.toggle('is-loading', flag);
+        dom.publishBtn.setAttribute('aria-busy', String(flag));
+        dom.publishLabel.textContent = flag ? '发布中…' : '发布';
+        dom.input.readOnly = flag;
+        updateComposer();
       }
 
-      /** 发布：校验 → 加载态 → 组装数据 → 落盘 → 渲染 → 复位输入框 */
       function handlePublish(event) {
         event.preventDefault();
         if (submitting) return;
@@ -1068,29 +2499,188 @@
         window.setTimeout(() => {
           const post = {
             id: generateId(),
-            content,
+            content: content,
             createdAt: Date.now(),
-            author: { name: '我' },
-            stats: { likes: 0, replies: 0 },
+            likes: 0,
+            liked: false,
+            hue: PALETTE[posts.length % PALETTE.length],
           };
 
-          posts.unshift(post); // 新帖置于最前
-          if (!savePosts()) {
-            showToast('本地存储不可用，这条片语仅保留在当前页面');
-          }
-          prependPost(post);
+          posts.unshift(post);
+          const saved = savePosts();
+
+          keyword = '';
+          dom.search.value = '';
+          filter = 'all';
+          syncTabs();
 
           dom.input.value = '';
           setSubmitting(false);
           dom.input.focus();
+
+          renderTimeline({ animateFirst: true });
+          renderTopics();
+
+          if (!saved) {
+            showToast('本地存储不可用，这条片语仅保留在当前页面');
+          } else {
+            showToast('已发布，落在广场最上方啦');
+          }
         }, PUBLISH_DELAY);
       }
 
-      /** 底部轻提示，2.6s 后自动消失 */
+      /* ================================================================
+         七、查看详情
+         ================================================================ */
+      function openDetail(id) {
+        const post = posts.find((item) => item.id === id);
+        if (!post) return;
+
+        viewingId = id;
+        const hue = hueOf(post);
+
+        dom.detailBanner.style.setProperty('--h', hue);
+        dom.detailAvatar.style.setProperty('--h', hue);
+        dom.detailName.textContent = '太子伴读';
+        dom.detailMeta.textContent = formatRelativeTime(post.createdAt) + ' · 来自本机';
+        fillContent(dom.detailContent, post.content);
+
+        dom.detailChars.textContent = String(countChars(post.content));
+        dom.detailLikes.textContent = String(post.likes);
+        dom.detailDate.textContent = formatDate(post.createdAt);
+
+        updateDetailLike(post);
+        openModal(dom.detailModal);
+      }
+
+      function updateDetailLike(post) {
+        dom.detailLike.setAttribute('aria-pressed', String(post.liked));
+        dom.detailLike.style.setProperty('--h', post.liked ? 340 : 268);
+        dom.detailLikeLabel.textContent = post.liked
+          ? '已赞 ' + post.likes
+          : '点赞 ' + (post.likes || '');
+        if (viewingId) dom.detailLikes.textContent = String(post.likes);
+      }
+
+      function closeDetail() {
+        closeModal(dom.detailModal);
+        viewingId = null;
+      }
+
+      /* ================================================================
+         八、点赞 / 复制 / 删除
+         ================================================================ */
+      function toggleLike(id) {
+        const post = posts.find((item) => item.id === id);
+        if (!post) return;
+
+        post.liked = !post.liked;
+        post.likes = Math.max(0, post.likes + (post.liked ? 1 : -1));
+        savePosts();
+
+        // 当前视图内的卡片就地更新，避免整列表重建导致滚动跳动
+        const card = dom.timeline.querySelector('.post[data-id="' + id + '"]');
+        if (card) {
+          const btn = card.querySelector('[data-action="like"]');
+          if (btn) {
+            btn.classList.toggle('is-liked', post.liked);
+            btn.setAttribute('aria-pressed', String(post.liked));
+            btn.setAttribute('aria-label', post.liked ? '取消点赞' : '点赞');
+            btn.innerHTML = btn.innerHTML.replace(/(<span>)\d+(<\/span>)/, '$1' + post.likes + '$2');
+            btn.classList.remove('is-bump');
+            void btn.offsetWidth;
+            btn.classList.add('is-bump');
+          }
+          const badge = card.querySelector('.post__badge');
+          if (badge) badge.textContent = post.liked ? '已赞' : '片语';
+        }
+
+        if (viewingId === id) updateDetailLike(post);
+
+        // 热门排序可能变化，重建列表保持顺序正确
+        if (filter === 'hot' && !keyword) renderTimeline();
+
+        syncStats(getVisiblePosts().length);
+        renderTopics();
+      }
+
+      function handleCopy(post) {
+        copyText(post.content)
+          .then(() => showToast('正文已复制到剪贴板'))
+          .catch(() => showToast('复制失败，请手动选中文字'));
+      }
+
+      function requestDelete(id) {
+        pendingDeleteId = id;
+        openModal(dom.confirmModal);
+        dom.confirmDelete.focus();
+      }
+
+      function closeConfirm() {
+        closeModal(dom.confirmModal);
+        pendingDeleteId = null;
+      }
+
+      function confirmDelete() {
+        const id = pendingDeleteId;
+        if (!id) { closeConfirm(); return; }
+
+        const card = dom.timeline.querySelector('.post[data-id="' + id + '"]');
+        const finalize = () => {
+          posts = posts.filter((post) => post.id !== id);
+          savePosts();
+          if (viewingId === id) closeDetail();
+          renderTimeline();
+          renderTopics();
+          showToast('已从这台设备上删除');
+        };
+
+        closeConfirm();
+
+        if (card) {
+          let done = false;
+          const once = () => {
+            if (done) return;
+            done = true;
+            finalize();
+          };
+          card.classList.add('is-leaving');
+          card.addEventListener('transitionend', once, { once: true });
+          window.setTimeout(once, 280);
+        } else {
+          finalize();
+        }
+      }
+
+      /* ================================================================
+         九、弹层与提示
+         ================================================================ */
+      function syncScrollLock() {
+        const hasOpen = document.querySelector('.modal:not([hidden])');
+        document.body.classList.toggle('is-locked', !!hasOpen);
+      }
+
+      function openModal(modal) {
+        lastFocused = document.activeElement;
+        modal.hidden = false;
+        syncScrollLock();
+      }
+
+      function closeModal(modal) {
+        if (modal.hidden) return;
+        modal.hidden = true;
+        syncScrollLock();
+
+        if (!document.querySelector('.modal:not([hidden])')) {
+          if (lastFocused && document.contains(lastFocused)) lastFocused.focus();
+          lastFocused = null;
+        }
+      }
+
       function showToast(message) {
         dom.toast.textContent = message;
         dom.toast.hidden = false;
-        void dom.toast.offsetWidth; // 确保过渡从初始态开始
+        void dom.toast.offsetWidth;
         dom.toast.classList.add('is-visible');
 
         window.clearTimeout(toastTimer);
@@ -1100,113 +2690,173 @@
         }, 2600);
       }
 
-      /* ---------------- 删除：二次确认 ---------------- */
-
-      /** 点击删除入口：先记下待删 id，再请用户确认 */
-      function requestDelete(postId) {
-        pendingDeleteId = postId;
-        openConfirmDialog();
+      /* ================================================================
+         十、筛选 / 搜索 / 导航
+         ================================================================ */
+      function syncTabs() {
+        dom.tabs.forEach((tab) => {
+          const active = tab.dataset.filter === filter;
+          tab.classList.toggle('is-active', active);
+          tab.setAttribute('aria-selected', String(active));
+        });
+        document.querySelectorAll('.navitem[data-filter]').forEach((item) => {
+          item.classList.toggle('is-active', item.dataset.filter === filter);
+        });
+        document.querySelectorAll('.tabbar__item[data-nav]').forEach((item) => {
+          const active = item.dataset.nav === filter;
+          item.classList.toggle('is-active', active);
+        });
       }
 
-      function openConfirmDialog() {
-        lastFocusedElement = document.activeElement;
-        dom.modal.hidden = false;
-        document.body.classList.add('is-modal-open'); // 锁定背景滚动
-        dom.confirmDeleteBtn.focus();                 // 焦点移入弹窗，键盘可直接回车
+      function setFilter(next) {
+        filter = next;
+        syncTabs();
+        renderTimeline();
       }
 
-      function closeConfirmDialog() {
-        if (dom.modal.hidden) return;
-
-        dom.modal.hidden = true;
-        document.body.classList.remove('is-modal-open');
-        pendingDeleteId = null;
-
-        // 焦点归位：原按钮仍在则回到按钮，已被移除则回到输入框
-        if (lastFocusedElement && document.contains(lastFocusedElement)) {
-          lastFocusedElement.focus();
-        } else {
-          dom.input.focus();
-        }
-        lastFocusedElement = null;
+      function setKeyword(next) {
+        keyword = next.trim();
+        dom.search.value = next;
+        renderTimeline();
       }
 
-      /** 用户确认删除：更新状态 → 落盘 → 淡出移除 */
-      function confirmDelete() {
-        const targetId = pendingDeleteId;
-        if (!targetId) {
-          closeConfirmDialog();
+      function scrollToComposer() {
+        dom.composer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        window.setTimeout(() => dom.input.focus({ preventScroll: true }), 260);
+      }
+
+      /* ================================================================
+         十一、事件绑定
+         ================================================================ */
+      function handleTimelineClick(event) {
+        const actionBtn = event.target.closest('[data-action]');
+        if (actionBtn) {
+          const card = actionBtn.closest('.post');
+          if (!card) return;
+          const id = card.dataset.id;
+          const action = actionBtn.dataset.action;
+
+          if (action === 'like') { toggleLike(id); return; }
+          if (action === 'view') { openDetail(id); return; }
+          if (action === 'copy') {
+            const post = posts.find((item) => item.id === id);
+            if (post) handleCopy(post);
+          }
           return;
         }
 
-        posts = posts.filter((post) => post.id !== targetId);
-        if (!savePosts()) {
-          showToast('本地存储不可用，本次删除仅在当前页面生效');
+        // 点击正文里的 #话题 直接搜索
+        const tag = event.target.closest('.tag');
+        if (tag) setKeyword(tag.textContent);
+      }
+
+      function handleDetailAction(event) {
+        const btn = event.target.closest('[data-detail-action]');
+        if (!btn || !viewingId) return;
+
+        const post = posts.find((item) => item.id === viewingId);
+        if (!post) return;
+
+        const action = btn.dataset.detailAction;
+        if (action === 'like') toggleLike(viewingId);
+        if (action === 'copy') handleCopy(post);
+        if (action === 'delete') requestDelete(viewingId);
+      }
+
+      function handleNav(event) {
+        const btn = event.target.closest('[data-nav]');
+        if (!btn) return;
+
+        const nav = btn.dataset.nav;
+        if (nav === 'write') { scrollToComposer(); return; }
+        if (nav === 'search') {
+          dom.search.focus();
+          dom.search.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
         }
-        removePostElement(targetId);
-
-        // 触发删除的按钮即将被移除，焦点直接回到输入框而非归还给按钮
-        lastFocusedElement = null;
-        closeConfirmDialog();
-      }
-
-      /** 时间线使用事件委托，避免为每张卡片单独绑定监听 */
-      function handleTimelineClick(event) {
-        const deleteBtn = event.target.closest('[data-action="delete"]');
-        if (!deleteBtn) return;
-
-        const item = deleteBtn.closest('.post');
-        if (item && item.dataset.id) requestDelete(item.dataset.id);
-      }
-
-      /** 仅在点击遮罩自身时关闭，避免面板内拖拽误触关闭 */
-      function handleModalPointerDown(event) {
-        if (dom.modal.hidden) return;
-        if (event.target === dom.modal || event.target.dataset.close === 'backdrop') {
-          closeConfirmDialog();
+        if (nav === 'top') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
         }
+        setFilter(nav);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
-      /** Esc 关闭弹窗，保证键盘可达性 */
       function handleGlobalKeydown(event) {
-        if (event.key === 'Escape' && !dom.modal.hidden) closeConfirmDialog();
+        if (event.key !== 'Escape') return;
+        if (!dom.confirmModal.hidden) { closeConfirm(); return; }
+        if (!dom.detailModal.hidden) closeDetail();
       }
 
-      /** 其他标签页改动数据时重新加载，避免多标签之间数据错乱 */
       function handleStorageChange(event) {
         if (event.key !== STORAGE_KEY) return;
         posts = loadPosts();
         renderTimeline();
-        syncEmptyState();
+        renderTopics();
       }
 
-      /** 从后台切回前台时立即校准相对时间 */
-      function handleVisibilityChange() {
-        if (document.visibilityState === 'visible') refreshTimes();
-      }
-
-      /* ================================================================
-         七、初始化
-         ================================================================ */
       function init() {
         posts = loadPosts();
         renderTimeline();
-        syncEmptyState();
-        updateComposerState();
+        renderTopics();
+        updateComposer();
+        syncTabs();
 
-        dom.input.addEventListener('input', updateComposerState);
+        dom.input.addEventListener('input', updateComposer);
         dom.form.addEventListener('submit', handlePublish);
 
         dom.timeline.addEventListener('click', handleTimelineClick);
-        dom.cancelDeleteBtn.addEventListener('click', closeConfirmDialog);
-        dom.confirmDeleteBtn.addEventListener('click', confirmDelete);
-        dom.modal.addEventListener('mousedown', handleModalPointerDown);
+
+        document.querySelectorAll('[data-filter]').forEach((btn) => {
+          btn.addEventListener('click', () => setFilter(btn.dataset.filter));
+        });
+
+        document.querySelectorAll('[data-nav]').forEach((btn) => {
+          btn.addEventListener('click', handleNav);
+        });
+
+        document.getElementById('topic-chips').addEventListener('click', (event) => {
+          const chip = event.target.closest('[data-tag]');
+          if (!chip) return;
+          const tag = chip.dataset.tag;
+          const start = dom.input.selectionStart || dom.input.value.length;
+          const value = dom.input.value;
+          const needsSpace = value && !/\s$/.test(value);
+          dom.input.value = value.slice(0, start) + (needsSpace ? ' ' : '') + tag + ' ' + value.slice(start);
+          dom.input.focus();
+          dom.input.selectionStart = dom.input.selectionEnd = dom.input.value.length;
+          updateComposer();
+        });
+
+        dom.topicList.addEventListener('click', (event) => {
+          const topic = event.target.closest('[data-topic]');
+          if (!topic) return;
+          setKeyword(topic.dataset.topic);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        dom.search.addEventListener('input', () => {
+          keyword = dom.search.value.trim();
+          renderTimeline();
+        });
+
+        dom.detailModal.addEventListener('click', (event) => {
+          if (event.target.closest('[data-detail-action]')) {
+            handleDetailAction(event);
+            return;
+          }
+          if (event.target.closest('[data-close-detail]')) closeDetail();
+        });
+
+        dom.cancelDelete.addEventListener('click', closeConfirm);
+        dom.confirmDelete.addEventListener('click', confirmDelete);
+        dom.confirmModal.addEventListener('click', (event) => {
+          if (event.target.closest('[data-close-confirm]')) closeConfirm();
+        });
+
         document.addEventListener('keydown', handleGlobalKeydown);
-
         window.addEventListener('storage', handleStorageChange);
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-
-        window.setInterval(refreshTimes, TIME_REFRESH_INTERVAL);
+        window.setInterval(refreshTimes, TIME_REFRESH);
       }
 
       init();
