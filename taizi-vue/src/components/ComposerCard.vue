@@ -5,7 +5,7 @@ import { countChars } from '../utils/format'
 import { MAX_LENGTH, PUBLISH_DELAY } from '../constants'
 
 const emit = defineEmits<{
-  published: [result: { saved: boolean }]
+  published: [result: { ok: boolean; message?: string }]
 }>()
 
 const store = useFeedStore()
@@ -49,14 +49,19 @@ function handleSubmit(): void {
 
   submitting.value = true
   window.setTimeout(() => {
-    const result = store.publish(content)
-    if (result) {
-      store.resetView()
-      draft.value = ''
-      inputEl.value?.focus({ preventScroll: true })
-      emit('published', result)
-    }
-    submitting.value = false
+    void (async () => {
+      const result = await store.publish(content)
+      if (result.ok) {
+        store.resetView()
+        draft.value = ''
+        inputEl.value?.focus({ preventScroll: true })
+        emit('published', { ok: true })
+      } else {
+        // 服务端拒绝时保留草稿，用户可以直接改了再发
+        emit('published', { ok: false, message: result.message })
+      }
+      submitting.value = false
+    })()
   }, PUBLISH_DELAY)
 }
 
@@ -73,7 +78,7 @@ defineExpose({ focusInput })
       <span class="avatar avatar--lg" style="--h: 268" aria-hidden="true">伴</span>
       <div>
         <p class="composer__title">此刻，想写下什么？</p>
-        <p class="composer__sub">140 字以内 · 只留在本机</p>
+        <p class="composer__sub">140 字以内 · 存于服务端内存</p>
       </div>
     </div>
 

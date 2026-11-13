@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useFeedStore } from './stores/feed'
-import { STORAGE_KEY } from './utils/storage'
 import { copyText } from './utils/clipboard'
 import { useToast } from './composables/toast'
 import type { Filter } from './types'
@@ -15,8 +14,6 @@ import Toast from './components/Toast.vue'
 
 const store = useFeedStore()
 const { show } = useToast()
-
-store.init()
 
 const viewingId = ref<string | null>(null)
 const pendingDeleteId = ref<string | null>(null)
@@ -37,6 +34,16 @@ watch(
 watch([viewingId, pendingDeleteId], ([detail, confirm]) => {
   document.body.classList.toggle('is-locked', Boolean(detail || confirm))
 })
+
+/* 任何一步操作失败都把原因播报出来，然后清空，避免重复提示 */
+watch(
+  () => store.error,
+  (message) => {
+    if (!message) return
+    show(message)
+    store.dismissError()
+  },
+)
 
 function handleSearchInput(event: Event): void {
   searchText.value = (event.target as HTMLInputElement).value
@@ -65,8 +72,12 @@ function focusSearch(): void {
   searchEl.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 
-function handlePublished(result: { saved: boolean }): void {
-  show(result.saved ? '已发布，落在广场最上方啦' : '本地存储不可用，这条片语仅保留在当前页面')
+function handlePublished(result: { ok: boolean; message?: string }): void {
+  if (result.ok) {
+    show('已发布，落在广场最上方啦')
+    return
+  }
+  show(result.message ?? '发布失败，请稍后再试')
 }
 
 function handleCopy(id: string): void {
@@ -77,17 +88,19 @@ function handleCopy(id: string): void {
     .catch(() => show('复制失败，请手动选中文字'))
 }
 
-function handleConfirmDelete(): void {
+async function handleConfirmDelete(): Promise<void> {
   const id = pendingDeleteId.value
   pendingDeleteId.value = null
   if (!id) return
-  store.removePost(id)
+
+  const removed = await store.removePost(id)
+  if (!removed) return // 失败原因由 store.error 统一提示
   if (viewingId.value === id) viewingId.value = null
-  show('已从这台设备上删除')
+  show('已从服务端删除')
 }
 
 function toggleViewingLike(): void {
-  if (viewingId.value) store.toggleLike(viewingId.value)
+  if (viewingId.value) void store.toggleLike(viewingId.value)
 }
 
 function copyViewing(): void {
@@ -111,18 +124,20 @@ function handleKeydown(event: KeyboardEvent): void {
   if (viewingId.value) viewingId.value = null
 }
 
-function handleStorage(event: StorageEvent): void {
-  if (event.key === STORAGE_KEY) store.reload()
+/** 窗口重新可见时拉一次最新数据，效果等同之前的跨标签页同步 */
+function handleVisibility(): void {
+  if (document.visibilityState === 'visible') void store.reload()
 }
 
 onMounted(() => {
+  void store.init()
   document.addEventListener('keydown', handleKeydown)
-  window.addEventListener('storage', handleStorage)
+  document.addEventListener('visibilitychange', handleVisibility)
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleKeydown)
-  window.removeEventListener('storage', handleStorage)
+  document.removeEventListener('visibilitychange', handleVisibility)
   document.body.classList.remove('is-locked')
 })
 </script>
@@ -169,7 +184,7 @@ onBeforeUnmount(() => {
             <rect x="4.5" y="10.5" width="15" height="9.5" rx="2.6" />
             <path d="M8.2 10.5V7.8a3.8 3.8 0 0 1 7.6 0v2.7" />
           </svg>
-          仅本机
+          内存存储
         </span>
         <button type="button" class="btn3d btn3d--sm" style="--h: 268" @click="scrollToComposer">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"
@@ -191,7 +206,7 @@ onBeforeUnmount(() => {
       <FeedView @view="viewingId = $event" @copy="handleCopy" @tag="searchTopic" />
 
       <footer class="page-footer">
-        <p>内容仅保存在此浏览器 · 太子伴读</p>
+        <p>内容存于服务端内存 · 太子伴读</p>
       </footer>
     </main>
 

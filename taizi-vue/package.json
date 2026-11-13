@@ -4,21 +4,29 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently -k -n api,web -c magenta,cyan \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:web": "vite",
+    "dev:api": "tsx watch server/index.ts",
+    "start": "tsx server/index.ts",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@hono/node-server": "^2.1.8",
+    "hono": "^4.13.18",
     "pinia": "^3.0.0",
     "vue": "^3.5.0"
   },
   "devDependencies": {
     "@pinia/testing": "^1.0.0",
+    "@types/node": "^26.6.6",
     "@vitejs/plugin-vue": "^5.2.0",
     "@vue/test-utils": "^2.4.0",
+    "concurrently": "^10.0.7",
     "jsdom": "^26.0.0",
+    "tsx": "^4.23.15",
     "typescript": "~5.7.2",
     "vite": "^6.0.0",
     "vitest": "^3.0.0",

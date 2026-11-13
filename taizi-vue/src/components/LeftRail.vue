@@ -62,6 +62,6 @@ const store = useFeedStore()
       </button>
     </nav>
 
-    <p class="rail__tip">所有内容仅保存在这台设备的浏览器里。</p>
+    <p class="rail__tip">所有内容保存在服务端内存中，服务重启后重置。</p>
   </aside>
 </template>

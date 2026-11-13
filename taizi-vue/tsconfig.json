@@ -12,11 +12,11 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["vite/client", "vitest/globals"],
+    "types": ["vite/client", "vitest/globals", "node"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.vue", "tests/**/*.ts", "vite.config.ts"]
+  "include": ["src/**/*.ts", "src/**/*.vue", "tests/**/*.ts", "server/**/*.ts", "vite.config.ts"]
 }

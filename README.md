@@ -2,12 +2,12 @@
 
 > 把此刻的一点点，写在五彩的广场上。
 
-> **新版本（推荐）**：本项目已通过 TDD 改写为 Node.js + Vue 3 + Pinia 工程，位于 [`taizi-vue/`](taizi-vue/README.md)。
-> 数据依然只保存在 `localStorage`，功能、视觉与交互与原版保持一致。
+> **新版本（推荐）**：本项目已通过 TDD 演进为 Vue 3 + Pinia 前端 + Hono RESTful 后端工程，位于 [`taizi-vue/`](taizi-vue/README.md)。
+> 数据不再写入 `localStorage`，而是由后端内存存储通过 `/api` 提供；功能、视觉与交互与原版保持一致。
 >
 > ```bash
 > cd taizi-vue && npm install && npm run dev
-> npm run test    # 110 个测试用例
+> npm run test    # 138 个测试用例（含后端 API 契约测试）
 > ```
 >
 > 下方内容为原始单文件版本（`index.html`）的说明，保留作对照。

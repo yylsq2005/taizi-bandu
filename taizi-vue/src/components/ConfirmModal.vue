@@ -20,7 +20,7 @@ defineEmits<{
         </svg>
       </span>
       <h2 id="confirm-title" class="confirm__title">删除这条片语？</h2>
-      <p id="confirm-desc" class="confirm__desc">删除后无法恢复，内容会从这台设备上移除。</p>
+      <p id="confirm-desc" class="confirm__desc">删除后无法恢复，内容会从服务端内存中移除。</p>
       <div class="confirm__actions">
         <button type="button" class="btn-flat" @click="$emit('close')">再想想</button>
         <button type="button" class="btn-danger" @click="$emit('confirm')">删除</button>

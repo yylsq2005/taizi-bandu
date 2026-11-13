@@ -32,7 +32,7 @@ const HUES = [340, 268, 225, 190, 45]
       <div class="side__head">
         <h2>玩法提示</h2>
       </div>
-      <p>点卡片右下角的<strong>「查看」</strong>立体按钮，可以展开全文、点赞或删除；数据全部存在浏览器本地。</p>
+      <p>点卡片右下角的<strong>「查看」</strong>立体按钮，可以展开全文、点赞或删除；数据存在服务端内存。</p>
     </section>
   </aside>
 </template>

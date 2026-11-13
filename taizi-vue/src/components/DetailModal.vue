@@ -14,7 +14,7 @@ defineEmits<{
 
 const hue = computed(() => (props.post ? hueOf(props.post) : 268))
 const parts = computed(() => (props.post ? splitContent(props.post.content) : []))
-const meta = computed(() => (props.post ? `${formatRelativeTime(props.post.createdAt)} · 来自本机` : ''))
+const meta = computed(() => (props.post ? `${formatRelativeTime(props.post.createdAt)} · 来自广场` : ''))
 const likeLabel = computed(() => {
   if (!props.post) return '点赞'
   return props.post.liked ? `已赞 ${props.post.likes}` : `点赞 ${props.post.likes || ''}`.trim()

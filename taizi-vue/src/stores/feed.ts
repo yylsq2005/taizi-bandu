@@ -2,25 +2,33 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { Filter, Post, TopicEntry } from '../types'
 import { extractTags } from '../utils/format'
-import {
-  DEFAULT_TOPICS,
-  MAX_LENGTH,
-  PALETTE,
-  byNewest,
-  generateId,
-  loadFeed,
-  saveFeed,
-} from '../utils/storage'
+import { DEFAULT_TOPICS, MAX_LENGTH } from '../constants'
+import { api } from '../api/client'
+
+/** 时间倒序：最新的排在最前 */
+function byNewest(a: Post, b: Post): number {
+  return b.createdAt - a.createdAt
+}
+
+/** 把任意异常转成可直接展示的中文文案（不依赖 instanceof，便于测试替换 client） */
+function errorText(error: unknown): string {
+  const message = (error as { message?: unknown } | null | undefined)?.message
+  return typeof message === 'string' && message ? message : '请求失败，请稍后再试'
+}
+
+export type PublishResult = { ok: true; post: Post } | { ok: false; message: string }
 
 /**
- * 片语广场的全局状态：数据、筛选、搜索全部收口在这里，
- * 组件只消费状态与动作，不直接触碰 localStorage。
+ * 片语广场的全局状态：列表由服务端内存存储提供，
+ * 筛选/搜索仍是本地派生，组件只消费状态与动作。
  */
 export const useFeedStore = defineStore('feed', () => {
   /* ---------------- 状态 ---------------- */
   const posts = ref<Post[]>([])
   const filter = ref<Filter>('all') // all | hot
   const keyword = ref('')
+  const loading = ref(false)
+  const error = ref<string | null>(null)
 
   /* ---------------- 派生 ---------------- */
   const visiblePosts = computed<Post[]>(() => {
@@ -46,7 +54,7 @@ export const useFeedStore = defineStore('feed', () => {
     const counter = new Map<string, number>()
     posts.value.forEach((post) => {
       extractTags(post.content).forEach((tag) => {
-        counter.set(tag, (counter.get(tag) || 0) + 1)
+        counter.set(tag, (counter.get(tag) ?? 0) + 1)
       })
     })
 
@@ -70,44 +78,81 @@ export const useFeedStore = defineStore('feed', () => {
   })
 
   /* ---------------- 动作 ---------------- */
-  /** 首次进入页面时从 localStorage 载入 */
-  function init(): void {
-    posts.value = loadFeed()
-  }
-
-  /** 多标签页 storage 事件触发时重新载入 */
-  function reload(): void {
-    posts.value = loadFeed()
-  }
-
-  /** 发布片语：非法内容返回 null，成功返回 { saved } 指示是否成功持久化 */
-  function publish(content: string): { saved: boolean } | null {
-    const trimmed = content.trim()
-    if (!trimmed || Array.from(trimmed).length > MAX_LENGTH) return null
-
-    const post: Post = {
-      id: generateId(),
-      content: trimmed,
-      createdAt: Date.now(),
-      likes: 0,
-      liked: false,
-      hue: PALETTE[posts.value.length % PALETTE.length],
+  /** 拉取列表：失败时保留原有数据，只记录错误 */
+  async function load(): Promise<void> {
+    loading.value = true
+    try {
+      const list = await api.listPosts()
+      posts.value = list.slice().sort(byNewest)
+      error.value = null
+    } catch (err) {
+      error.value = errorText(err)
+    } finally {
+      loading.value = false
     }
-    posts.value.unshift(post)
-    return { saved: saveFeed(posts.value) }
   }
 
-  function toggleLike(id: string): void {
+  /** 首次进入页面时载入 */
+  const init = load
+
+  /** 窗口重新可见时刷新，等同于多端数据同步 */
+  const reload = load
+
+  /** 发布片语：本地先校验，再交给服务端 */
+  async function publish(content: string): Promise<PublishResult> {
+    const trimmed = content.trim()
+    if (!trimmed) return { ok: false, message: '内容不能为空' }
+    if (Array.from(trimmed).length > MAX_LENGTH) return { ok: false, message: `最多 ${MAX_LENGTH} 字` }
+
+    try {
+      const created = await api.createPost(trimmed)
+      const index = posts.value.findIndex((item) => item.id === created.id)
+      if (index >= 0) posts.value.splice(index, 1, created)
+      else posts.value.unshift(created)
+      error.value = null
+      return { ok: true, post: created }
+    } catch (err) {
+      const message = errorText(err)
+      error.value = message
+      return { ok: false, message }
+    }
+  }
+
+  /** 点赞：先乐观更新，再用服务端结果校正，失败回滚 */
+  async function toggleLike(id: string): Promise<void> {
     const post = posts.value.find((item) => item.id === id)
     if (!post) return
-    post.liked = !post.liked
-    post.likes = Math.max(0, post.likes + (post.liked ? 1 : -1))
-    saveFeed(posts.value)
+
+    const before = { liked: post.liked, likes: post.likes }
+    const next = !before.liked
+    post.liked = next
+    post.likes = Math.max(0, before.likes + (next ? 1 : -1))
+
+    try {
+      const updated = await api.updatePost(id, { liked: next })
+      const index = posts.value.findIndex((item) => item.id === id)
+      if (index >= 0) posts.value.splice(index, 1, updated)
+      error.value = null
+    } catch (err) {
+      const index = posts.value.findIndex((item) => item.id === id)
+      if (index >= 0) posts.value.splice(index, 1, { ...posts.value[index], ...before })
+      error.value = errorText(err)
+    }
   }
 
-  function removePost(id: string): void {
-    posts.value = posts.value.filter((post) => post.id !== id)
-    saveFeed(posts.value)
+  /** 删除：服务端确认成功后才从列表移除 */
+  async function removePost(id: string): Promise<boolean> {
+    if (!posts.value.some((item) => item.id === id)) return true
+
+    try {
+      await api.deletePost(id)
+      posts.value = posts.value.filter((item) => item.id !== id)
+      error.value = null
+      return true
+    } catch (err) {
+      error.value = errorText(err)
+      return false
+    }
   }
 
   function setFilter(next: Filter): void {
@@ -124,10 +169,16 @@ export const useFeedStore = defineStore('feed', () => {
     keyword.value = ''
   }
 
+  function dismissError(): void {
+    error.value = null
+  }
+
   return {
     posts,
     filter,
     keyword,
+    loading,
+    error,
     visiblePosts,
     totalLikes,
     topics,
@@ -140,5 +191,6 @@ export const useFeedStore = defineStore('feed', () => {
     setFilter,
     setKeyword,
     resetView,
+    dismissError,
   }
 })

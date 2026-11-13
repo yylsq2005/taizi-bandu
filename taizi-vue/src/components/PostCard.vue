@@ -40,7 +40,7 @@ const parts = computed(() => splitContent(props.post.content))
           </span>
           <span class="post__meta">
             <time :datetime="new Date(post.createdAt).toISOString()">{{ relativeTime }}</time>
-            · 来自本机
+            · 来自广场
           </span>
         </div>
         <span class="post__badge">{{ post.liked ? '已赞' : '片语' }}</span>
