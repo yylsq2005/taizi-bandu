@@ -1057,6 +1057,14 @@
       border: 1px solid hsl(var(--violet) 80% 90%);
     }
 
+    /* 已收藏的徽标：琥珀金渐变胶囊 */
+    .post__badge--fav {
+      color: #fff;
+      background: linear-gradient(120deg, #FFD770 0%, #F59E0B 58%, #D97706 100%);
+      border-color: transparent;
+      box-shadow: 0 6px 12px -8px rgba(217, 119, 6, .9);
+    }
+
     .post__body {
       margin: 10px 0 0;
       font-size: 15.2px;
@@ -1117,6 +1125,39 @@
       60% { transform: scale(.9); }
       100% { transform: scale(1); }
     }
+
+    /* 收藏按钮：与点赞同尺寸同结构，配色换成琥珀金 */
+    .fav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 11px;
+      border: 0;
+      border-radius: 99px;
+      background: rgba(244, 242, 252, .9);
+      color: #7A7F96;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--dur) var(--ease);
+    }
+
+    .fav-btn svg { flex: none; }
+
+    .fav-btn:hover {
+      color: hsl(var(--amber) 88% 44%);
+      background: hsl(var(--amber) 100% 95%);
+    }
+
+    .fav-btn.is-faved {
+      color: #fff;
+      background: linear-gradient(130deg, #FFD770, #F59E0B 55%, #D97706);
+      box-shadow: 0 8px 16px -10px rgba(217, 119, 6, .95);
+    }
+
+    .fav-btn.is-faved svg { fill: currentColor; }
+
+    .fav-btn:active { transform: scale(.94); }
 
     .ghost-btn {
       padding: 5px 11px;
@@ -1291,15 +1332,17 @@
       overflow-wrap: anywhere;
     }
 
+    /* 四项统计：字数 / 获赞 / 收藏 / 发布，靠缩小内边距与字号保证不换行不溢出 */
     .sheet__stats {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       margin-top: 18px;
     }
 
     .sheet__stats > div {
       flex: 1 1 0;
-      padding: 10px 12px;
+      min-width: 0;
+      padding: 9px 8px;
       border-radius: 14px;
       background: linear-gradient(160deg, #FAF8FF, #F2F6FF);
       border: 1px solid rgba(168, 85, 247, .1);
@@ -1308,10 +1351,11 @@
 
     .sheet__stats b {
       display: block;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
       color: hsl(var(--violet) 62% 52%);
       font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
 
     .sheet__stats span { font-size: 11px; color: var(--ink-3); }
@@ -1515,6 +1559,12 @@
       .sheet { max-height: 84vh; }
       .sheet__body { padding: 0 18px 20px; }
       .sheet__content { font-size: 15.5px; }
+
+      /* 小屏下四项统计再收一档，保持一行四卡 */
+      .sheet__stats { gap: 4px; margin-top: 16px; }
+      .sheet__stats > div { padding: 8px 4px; border-radius: 12px; }
+      .sheet__stats b { font-size: 13px; letter-spacing: -.2px; }
+      .sheet__stats span { font-size: 10.5px; }
 
       /* 吸底导航 */
       .tabbar {
