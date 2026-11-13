@@ -1,0 +1,34 @@
+# ---- 操作系统杂项 ----
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ---- 编辑器 / IDE ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ---- 日志与临时文件 ----
+*.log
+npm-debug.log*
+yarn-error.log*
+*.tmp
+*.bak
+
+# ---- 依赖与构建产物（当前项目零依赖，仅作未来兜底）----
+node_modules/
+dist/
+build/
+.cache/
+
+# ---- 本地环境变量 ----
+.env
+.env.local
+.env.*.local
