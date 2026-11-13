@@ -284,7 +284,51 @@
     }
 
     /* ==================================================================
-       8. 页脚
+       8. 信息流卡片（Post）
+       ================================================================== */
+    .post {
+      display: flex;
+      gap: 12px;
+      padding: 16px 20px;
+    }
+
+    .post__main {
+      flex: 1 1 auto;
+      min-width: 0; /* 允许长串字符换行，不撑破卡片 */
+    }
+
+    .post__head {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .post__author {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .post__dot { color: var(--text-faint); }
+
+    .post__time {
+      color: var(--text-faint);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .post__body {
+      margin: 6px 0 0;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-muted);
+      /* 保留用户输入中的换行，同时允许超长单词/链接折行 */
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    /* ==================================================================
+       9. 页脚
        ================================================================== */
     .page-footer {
       margin-top: 28px;
@@ -345,5 +389,271 @@
       <p>内容仅保存在此浏览器 · 太子伴读</p>
     </footer>
   </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      /* ================================================================
+         一、常量与 DOM 引用
+         ================================================================ */
+      const STORAGE_KEY = 'taizi.feed.v1';   // 带版本号的键名，便于将来结构升级
+      const STORAGE_VERSION = 1;
+      const MAX_LENGTH = 140;                // 单条片语的字数上限
+      const TIME_REFRESH_INTERVAL = 30 * 1000; // 相对时间的自动刷新间隔
+
+      const dom = {
+        form: document.getElementById('composer-form'),
+        input: document.getElementById('composer-input'),
+        counter: document.getElementById('char-counter'),
+        publishBtn: document.getElementById('publish-btn'),
+        timeline: document.getElementById('timeline'),
+      };
+
+      /* ================================================================
+         二、状态
+         posts 是唯一数据源，始终按 createdAt 倒序（新帖在前）维护
+         ================================================================ */
+      let posts = [];
+
+      /* ================================================================
+         三、存储层：与 localStorage 打交道，不触碰 DOM
+         ================================================================ */
+
+      /** 读取本地数据；任何异常都降级为空数组，绝不阻塞页面使用 */
+      function loadPosts() {
+        try {
+          const raw = window.localStorage.getItem(STORAGE_KEY);
+          if (!raw) return [];
+
+          const parsed = JSON.parse(raw);
+          // 兼容两种历史形态：直接存数组，或存 { version, posts }
+          const list = Array.isArray(parsed)
+            ? parsed
+            : (parsed && Array.isArray(parsed.posts) ? parsed.posts : []);
+
+          return list
+            .map(normalizePost)
+            .filter(Boolean)
+            .sort((a, b) => b.createdAt - a.createdAt);
+        } catch (error) {
+          console.warn('[太子伴读] 读取本地数据失败，已降级为本次会话内存态：', error);
+          return [];
+        }
+      }
+
+      /** 写入本地数据，返回是否成功（隐私模式 / 超出配额时会失败） */
+      function savePosts() {
+        try {
+          window.localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({ version: STORAGE_VERSION, posts: posts })
+          );
+          return true;
+        } catch (error) {
+          console.warn('[太子伴读] 保存到本地失败（可能处于隐私模式或存储已满）：', error);
+          return false;
+        }
+      }
+
+      /**
+       * 校验并补齐单条数据，保证后续渲染逻辑拿到的字段一定合法
+       * @param {any} raw 原始存储数据
+       * @returns {{id:string, content:string, createdAt:number, author:object, stats:object}|null}
+       */
+      function normalizePost(raw) {
+        if (!raw || typeof raw !== 'object') return null;
+
+        const content = typeof raw.content === 'string' ? raw.content : '';
+        if (!content.trim()) return null; // 丢弃空内容，避免时间线出现空白卡片
+
+        const timestamp = Number(raw.createdAt);
+        return {
+          id: typeof raw.id === 'string' && raw.id ? raw.id : generateId(),
+          content,
+          createdAt: Number.isFinite(timestamp) && timestamp > 0 ? timestamp : Date.now(),
+          // 以下字段为未来扩展预留（昵称、点赞、回复等），当前仅作展示兜底
+          author: raw.author && typeof raw.author === 'object' ? raw.author : { name: '我' },
+          stats: raw.stats && typeof raw.stats === 'object' ? raw.stats : { likes: 0, replies: 0 },
+        };
+      }
+
+      /* ================================================================
+         四、工具层：纯函数，无副作用
+         ================================================================ */
+
+      /** 生成唯一 id；优先使用原生 crypto，旧浏览器降级为时间戳 + 随机串 */
+      function generateId() {
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+          return window.crypto.randomUUID();
+        }
+        return 'p_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+      }
+
+      /**
+       * 按 Unicode 码点统计字数
+       * 用 Array.from 而非 .length，可避免中文与 emoji 被算成多个字
+       */
+      function countChars(text) {
+        return Array.from(text).length;
+      }
+
+      /**
+       * 时间戳 → 相对时间文案
+       * 刚刚 / N 分钟前 / N 小时前 / N 天前 / 具体日期
+       */
+      function formatRelativeTime(timestamp) {
+        const diff = Date.now() - timestamp;
+        if (diff < 0) return '刚刚'; // 本机时间回拨时兜底
+
+        const MINUTE = 60 * 1000;
+        const HOUR = 60 * MINUTE;
+        const DAY = 24 * HOUR;
+
+        if (diff < MINUTE) return '刚刚';
+        if (diff < HOUR) return Math.floor(diff / MINUTE) + ' 分钟前';
+        if (diff < DAY) return Math.floor(diff / HOUR) + ' 小时前';
+        if (diff < 30 * DAY) return Math.floor(diff / DAY) + ' 天前';
+
+        const date = new Date(timestamp);
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const sameYear = date.getFullYear() === new Date().getFullYear();
+        return sameYear
+          ? month + ' 月 ' + day + ' 日'
+          : date.getFullYear() + ' 年 ' + month + ' 月 ' + day + ' 日';
+      }
+
+      /* ================================================================
+         五、渲染层：只负责把数据变成 DOM
+         ================================================================ */
+
+      /**
+       * 创建一条片语卡片
+       * 关键：用户内容一律写入 textContent，绝不拼接进 innerHTML，从根源杜绝 XSS
+       * @param {object} post
+       * @returns {HTMLLIElement}
+       */
+      function createPostElement(post) {
+        const item = document.createElement('li');
+        item.className = 'post card';
+        item.dataset.id = post.id;
+
+        const avatar = document.createElement('span');
+        avatar.className = 'avatar post__avatar';
+        avatar.setAttribute('aria-hidden', 'true');
+        avatar.textContent = (post.author && post.author.name ? post.author.name : '我').slice(0, 1) || '伴';
+
+        const main = document.createElement('div');
+        main.className = 'post__main';
+
+        const head = document.createElement('div');
+        head.className = 'post__head';
+
+        const author = document.createElement('span');
+        author.className = 'post__author';
+        author.textContent = (post.author && post.author.name) || '我';
+
+        const dot = document.createElement('span');
+        dot.className = 'post__dot';
+        dot.textContent = '·';
+
+        const time = document.createElement('time');
+        time.className = 'post__time';
+        time.dateTime = new Date(post.createdAt).toISOString();
+        time.dataset.time = String(post.createdAt); // 供定时刷新读取，避免遍历数据数组
+        time.textContent = formatRelativeTime(post.createdAt);
+
+        const body = document.createElement('p');
+        body.className = 'post__body';
+        body.textContent = post.content;
+
+        head.append(author, dot, time);
+        main.append(head, body);
+        item.append(avatar, main);
+        return item;
+      }
+
+      /** 全量渲染：仅在首屏与数据整体变化时调用，用 DocumentFragment 减少回流 */
+      function renderTimeline() {
+        const fragment = document.createDocumentFragment();
+        posts.forEach((post) => fragment.appendChild(createPostElement(post)));
+        dom.timeline.replaceChildren(fragment);
+      }
+
+      /** 增量渲染：新帖直接插到列表顶部，保留输入焦点且不重建整列表 */
+      function prependPost(post) {
+        dom.timeline.prepend(createPostElement(post));
+      }
+
+      /** 只更新已渲染卡片上的时间文案，不重建 DOM */
+      function refreshTimes() {
+        if (document.visibilityState === 'hidden') return; // 页面不可见时不做无用功
+        dom.timeline.querySelectorAll('time[data-time]').forEach((node) => {
+          const timestamp = Number(node.dataset.time);
+          if (Number.isFinite(timestamp)) node.textContent = formatRelativeTime(timestamp);
+        });
+      }
+
+      /* ================================================================
+         六、交互层
+         ================================================================ */
+
+      /** 根据当前输入同步「剩余字数 + 发布按钮可用状态」 */
+      function updateComposerState() {
+        const value = dom.input.value;
+        const used = countChars(value);
+        const remaining = MAX_LENGTH - used;
+
+        dom.counter.textContent = remaining >= 0
+          ? '还可输入 ' + remaining + ' 字'
+          : '已超出 ' + Math.abs(remaining) + ' 字';
+        dom.counter.dataset.state = remaining < 0 ? 'over' : (remaining <= 20 ? 'warn' : 'normal');
+
+        // 空内容或超出上限时禁止发布
+        dom.publishBtn.disabled = remaining < 0 || value.trim() === '';
+      }
+
+      /** 发布：校验 → 组装数据 → 落盘 → 渲染 → 复位输入框 */
+      function handlePublish(event) {
+        event.preventDefault();
+
+        const content = dom.input.value.trim();
+        if (!content || countChars(content) > MAX_LENGTH) return;
+
+        const post = {
+          id: generateId(),
+          content,
+          createdAt: Date.now(),
+          author: { name: '我' },
+          stats: { likes: 0, replies: 0 },
+        };
+
+        posts.unshift(post);   // 新帖置于最前
+        savePosts();
+        prependPost(post);
+
+        dom.input.value = '';
+        updateComposerState();
+        dom.input.focus();
+      }
+
+      /* ================================================================
+         七、初始化
+         ================================================================ */
+      function init() {
+        posts = loadPosts();
+        renderTimeline();
+        updateComposerState();
+
+        dom.input.addEventListener('input', updateComposerState);
+        dom.form.addEventListener('submit', handlePublish);
+
+        window.setInterval(refreshTimes, TIME_REFRESH_INTERVAL);
+      }
+
+      init();
+    })();
+  </script>
 </body>
 </html>
