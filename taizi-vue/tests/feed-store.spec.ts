@@ -22,6 +22,8 @@ vi.mock('../src/api/client', () => {
       getPost: vi.fn(),
       createPost: vi.fn(),
       updatePost: vi.fn(),
+      likePost: vi.fn(),
+      favoritePost: vi.fn(),
       deletePost: vi.fn(),
     },
   }
@@ -40,6 +42,8 @@ function post(id: string, overrides: Partial<Post> = {}): Post {
     createdAt: 100,
     likes: 0,
     liked: false,
+    favorites: 0,
+    favorited: false,
     hue: 340,
     ...overrides,
   }
@@ -177,7 +181,7 @@ describe('toggleLike：点赞与取消', () => {
     await store.init()
 
     const { promise, resolve } = pending<Post>()
-    mocked.updatePost.mockReturnValue(promise)
+    mocked.likePost.mockReturnValue(promise)
 
     const task = store.toggleLike('a')
     expect(store.posts[0].liked).toBe(true)
@@ -186,7 +190,7 @@ describe('toggleLike：点赞与取消', () => {
     resolve(post('a', { likes: 13, liked: true }))
     await task
     expect(store.posts[0].likes).toBe(13)
-    expect(mocked.updatePost).toHaveBeenCalledWith('a', { liked: true })
+    expect(mocked.likePost).toHaveBeenCalledWith('a', true)
   })
 
   it('成功后以服务端返回值覆盖本地', async () => {
@@ -194,7 +198,7 @@ describe('toggleLike：点赞与取消', () => {
     mocked.listPosts.mockResolvedValueOnce([post('a', { likes: 12 })])
     await store.init()
 
-    mocked.updatePost.mockResolvedValue(post('a', { likes: 99, liked: true }))
+    mocked.likePost.mockResolvedValue(post('a', { likes: 99, liked: true }))
     await store.toggleLike('a')
     expect(store.posts[0]).toMatchObject({ likes: 99, liked: true })
   })
@@ -204,9 +208,9 @@ describe('toggleLike：点赞与取消', () => {
     mocked.listPosts.mockResolvedValueOnce([post('a', { likes: 12, liked: true })])
     await store.init()
 
-    mocked.updatePost.mockResolvedValue(post('a', { likes: 11, liked: false }))
+    mocked.likePost.mockResolvedValue(post('a', { likes: 11, liked: false }))
     await store.toggleLike('a')
-    expect(mocked.updatePost).toHaveBeenCalledWith('a', { liked: false })
+    expect(mocked.likePost).toHaveBeenCalledWith('a', false)
     expect(store.posts[0]).toMatchObject({ likes: 11, liked: false })
   })
 
@@ -215,7 +219,7 @@ describe('toggleLike：点赞与取消', () => {
     mocked.listPosts.mockResolvedValueOnce([post('a', { likes: 12 })])
     await store.init()
 
-    mocked.updatePost.mockRejectedValue(new Error('片语不存在'))
+    mocked.likePost.mockRejectedValue(new Error('片语不存在'))
     await store.toggleLike('a')
 
     expect(store.posts[0]).toMatchObject({ likes: 12, liked: false })
@@ -227,7 +231,7 @@ describe('toggleLike：点赞与取消', () => {
     mocked.listPosts.mockResolvedValueOnce([post('a', { likes: 0, liked: true })])
     await store.init()
 
-    mocked.updatePost.mockResolvedValue(post('a', { likes: 0, liked: false }))
+    mocked.likePost.mockResolvedValue(post('a', { likes: 0, liked: false }))
     await store.toggleLike('a')
     expect(store.posts[0].likes).toBe(0)
   })
@@ -237,7 +241,85 @@ describe('toggleLike：点赞与取消', () => {
     await store.init()
 
     await expect(store.toggleLike('ghost')).resolves.toBeUndefined()
-    expect(mocked.updatePost).not.toHaveBeenCalled()
+    expect(mocked.likePost).not.toHaveBeenCalled()
+  })
+})
+
+describe('toggleFavorite：收藏与取消', () => {
+  it('乐观更新：请求未返回时已收藏且数量 +1', async () => {
+    const store = useFeedStore()
+    mocked.listPosts.mockResolvedValueOnce([post('a', { favorites: 4 })])
+    await store.init()
+
+    const { promise, resolve } = pending<Post>()
+    mocked.favoritePost.mockReturnValue(promise)
+
+    const task = store.toggleFavorite('a')
+    expect(store.posts[0].favorited).toBe(true)
+    expect(store.posts[0].favorites).toBe(5)
+
+    resolve(post('a', { favorites: 5, favorited: true }))
+    await task
+    expect(mocked.favoritePost).toHaveBeenCalledWith('a', true)
+    expect(store.posts[0]).toMatchObject({ favorited: true, favorites: 5 })
+  })
+
+  it('成功后以服务端返回值覆盖本地', async () => {
+    const store = useFeedStore()
+    mocked.listPosts.mockResolvedValueOnce([post('a', { favorites: 4 })])
+    await store.init()
+
+    mocked.favoritePost.mockResolvedValue(post('a', { favorites: 42, favorited: true }))
+    await store.toggleFavorite('a')
+    expect(store.posts[0]).toMatchObject({ favorited: true, favorites: 42 })
+  })
+
+  it('再次点击取消收藏，数量不为负', async () => {
+    const store = useFeedStore()
+    mocked.listPosts.mockResolvedValueOnce([post('a', { favorites: 0, favorited: true })])
+    await store.init()
+
+    mocked.favoritePost.mockResolvedValue(post('a', { favorites: 0, favorited: false }))
+    await store.toggleFavorite('a')
+    expect(mocked.favoritePost).toHaveBeenCalledWith('a', false)
+    expect(store.posts[0]).toMatchObject({ favorited: false, favorites: 0 })
+  })
+
+  it('请求失败时回滚并记录错误', async () => {
+    const store = useFeedStore()
+    mocked.listPosts.mockResolvedValueOnce([post('a', { favorites: 6 })])
+    await store.init()
+
+    mocked.favoritePost.mockRejectedValue(new Error('收藏失败'))
+    await store.toggleFavorite('a')
+
+    expect(store.posts[0]).toMatchObject({ favorited: false, favorites: 6 })
+    expect(store.error).toBe('收藏失败')
+  })
+
+  it('收藏后立即出现在「收藏」筛选中，取消后移除', async () => {
+    const store = useFeedStore()
+    mocked.listPosts.mockResolvedValueOnce([
+      post('a', { createdAt: 2 }),
+      post('b', { createdAt: 1 }),
+    ])
+    await store.init()
+
+    mocked.favoritePost.mockResolvedValue(post('a', { favorites: 1, favorited: true }))
+    store.setFilter('favorites')
+    expect(store.visiblePosts).toEqual([])
+
+    await store.toggleFavorite('a')
+    expect(store.visiblePosts.map((item) => item.id)).toEqual(['a'])
+    expect(store.favoriteCount).toBe(1)
+  })
+
+  it('不存在的 id 无副作用且不发请求', async () => {
+    const store = useFeedStore()
+    await store.init()
+
+    await expect(store.toggleFavorite('ghost')).resolves.toBeUndefined()
+    expect(mocked.favoritePost).not.toHaveBeenCalled()
   })
 })
 
@@ -282,9 +364,9 @@ describe('removePost：删除', () => {
 describe('visiblePosts：筛选与搜索', () => {
   async function prepare() {
     mocked.listPosts.mockResolvedValueOnce([
-      post('newest', { createdAt: 400, likes: 1, content: '梧桐叶黄了 #今日片语' }),
+      post('newest', { createdAt: 400, likes: 1, content: '梧桐叶黄了 #今日片语', favorited: true }),
       post('middle', { createdAt: 300, likes: 99, content: '读完一本书 #读书笔记' }),
-      post('oldest', { createdAt: 200, likes: 50, content: '地铁见闻 #通勤路上' }),
+      post('oldest', { createdAt: 200, likes: 50, content: '地铁见闻 #通勤路上', favorited: true }),
     ])
     const store = useFeedStore()
     await store.init()
@@ -300,6 +382,19 @@ describe('visiblePosts：筛选与搜索', () => {
     const store = await prepare()
     store.setFilter('hot')
     expect(store.visiblePosts.map((item) => item.id)).toEqual(['middle', 'oldest', 'newest'])
+  })
+
+  it('收藏：仅显示已收藏，按时间倒序', async () => {
+    const store = await prepare()
+    store.setFilter('favorites')
+    expect(store.visiblePosts.map((item) => item.id)).toEqual(['newest', 'oldest'])
+  })
+
+  it('收藏与搜索叠加生效', async () => {
+    const store = await prepare()
+    store.setFilter('favorites')
+    store.setKeyword('地铁')
+    expect(store.visiblePosts.map((item) => item.id)).toEqual(['oldest'])
   })
 
   it('搜索：大小写不敏感的子串匹配', async () => {
@@ -368,7 +463,18 @@ describe('统计与文案', () => {
     expect(store.totalLikes).toBe(7)
   })
 
-  it('feedLabel 三种状态文案', async () => {
+  it('favoriteCount 统计当前用户收藏条数', async () => {
+    mocked.listPosts.mockResolvedValueOnce([
+      post('a', { favorited: true }),
+      post('b', { favorited: true }),
+      post('c'),
+    ])
+    const store = useFeedStore()
+    await store.init()
+    expect(store.favoriteCount).toBe(2)
+  })
+
+  it('feedLabel 四种状态文案', async () => {
     mocked.listPosts.mockResolvedValueOnce([post('a'), post('b')])
     const store = useFeedStore()
     await store.init()
@@ -376,6 +482,9 @@ describe('统计与文案', () => {
     expect(store.feedLabel).toBe('2 条片语')
     store.setFilter('hot')
     expect(store.feedLabel).toBe('热门 2 条')
+    store.setFilter('favorites')
+    expect(store.feedLabel).toBe('收藏 0 条')
+    store.setFilter('all')
     store.setKeyword('内容 a')
     expect(store.feedLabel).toBe('找到 1 条')
   })
