@@ -37,6 +37,13 @@ describe('createSeedPosts', () => {
     expect(posts[1].content).toContain('\n原来最动人的永远是那些笨拙又认真的坚持。#读书笔记')
     expect(posts[2].content).toBe('地铁上听到两个小朋友认真讨论宇宙的尽头，比任何播客都精彩。#通勤路上')
   })
+
+  it('示例数据自带非零收藏数，且默认都未收藏', () => {
+    const posts = createSeedPosts(NOW)
+    expect(posts.map((post) => post.favorites)).toEqual([5, 3, 9])
+    expect(posts.every((post) => post.favorites > 0)).toBe(true)
+    expect(posts.every((post) => post.favorited === false)).toBe(true)
+  })
 })
 
 describe('createPostStore', () => {
@@ -60,12 +67,16 @@ describe('createPostStore', () => {
     expect(first.createdAt).toBe(NOW)
     expect(first.likes).toBe(0)
     expect(first.liked).toBe(false)
+    expect(first.favorites).toBe(0)
+    expect(first.favorited).toBe(false)
     expect(first.hue).toBe(PALETTE[0])
     expect(store.count()).toBe(1)
 
     const second = store.create({ content: '第二条' })
     expect(second.id).toBe('id-2')
     expect(second.hue).toBe(PALETTE[1])
+    expect(second.favorites).toBe(0)
+    expect(second.favorited).toBe(false)
   })
 
   it('hue 七条一轮转', () => {
@@ -136,6 +147,25 @@ describe('createPostStore', () => {
     expect(store.update(post.id, { liked: false }).likes).toBe(0)
   })
 
+  it('update 支持 favorited，与 likes 互不影响且重复设置幂等', () => {
+    const store = emptyStore()
+    const post = store.create({ content: '收藏测试' })
+
+    const faved = store.update(post.id, { favorited: true })
+    expect(faved.favorited).toBe(true)
+    expect(faved.favorites).toBe(1)
+    expect(faved.likes).toBe(0)
+    expect(faved.liked).toBe(false)
+
+    expect(store.update(post.id, { favorited: true }).favorites).toBe(1)
+
+    const both = store.update(post.id, { liked: true, favorited: false })
+    expect(both.favorited).toBe(false)
+    expect(both.favorites).toBe(0)
+    expect(both.liked).toBe(true)
+    expect(both.likes).toBe(1)
+  })
+
   it('update 内容不影响创建时间与配色', () => {
     let clock = NOW
     const store = createPostStore({ seed: false, now: () => clock })
@@ -162,6 +192,97 @@ describe('createPostStore', () => {
       expect(error).toBeInstanceOf(StoreError)
       expect((error as StoreError).code).toBe('NOT_FOUND')
     }
+  })
+
+  it('toggleLike 不传第二参即切换，传了即显式设置', () => {
+    const store = emptyStore()
+    const post = store.create({ content: '切换点赞' })
+
+    const on = store.toggleLike(post.id)
+    expect(on.liked).toBe(true)
+    expect(on.likes).toBe(1)
+
+    const off = store.toggleLike(post.id)
+    expect(off.liked).toBe(false)
+    expect(off.likes).toBe(0)
+
+    expect(store.toggleLike(post.id, true).likes).toBe(1)
+    expect(store.toggleLike(post.id, true).liked).toBe(true)
+    expect(store.toggleLike(post.id, true).likes).toBe(1)
+    expect(store.toggleLike(post.id, false).likes).toBe(0)
+  })
+
+  it('toggleFavorite 不传第二参即切换，传了即显式设置', () => {
+    const store = emptyStore()
+    const post = store.create({ content: '切换收藏' })
+
+    const on = store.toggleFavorite(post.id)
+    expect(on.favorited).toBe(true)
+    expect(on.favorites).toBe(1)
+    expect(on.likes).toBe(0)
+
+    const off = store.toggleFavorite(post.id)
+    expect(off.favorited).toBe(false)
+    expect(off.favorites).toBe(0)
+
+    expect(store.toggleFavorite(post.id, true).favorites).toBe(1)
+    expect(store.toggleFavorite(post.id, true).favorites).toBe(1)
+    expect(store.toggleFavorite(post.id, false).favorited).toBe(false)
+    expect(store.toggleFavorite(post.id, false).favorites).toBe(0)
+  })
+
+  it('toggleLike / toggleFavorite 的计数都不小于 0', () => {
+    const store = emptyStore()
+    const post = store.create({ content: '零边界' })
+
+    expect(store.toggleLike(post.id, false).likes).toBe(0)
+    expect(store.toggleFavorite(post.id, false).favorites).toBe(0)
+
+    store.toggleLike(post.id, true)
+    store.toggleFavorite(post.id, true)
+    expect(store.toggleLike(post.id, false).likes).toBe(0)
+    expect(store.toggleFavorite(post.id, false).favorites).toBe(0)
+    expect(store.toggleLike(post.id, false).likes).toBe(0)
+    expect(store.toggleFavorite(post.id, false).favorites).toBe(0)
+  })
+
+  it('toggleLike / toggleFavorite 未知 id 抛 NOT_FOUND', () => {
+    const store = emptyStore()
+    for (const run of [() => store.toggleLike('missing'), () => store.toggleFavorite('missing')]) {
+      try {
+        run()
+        throw new Error('未抛出异常')
+      } catch (error) {
+        expect(error).toBeInstanceOf(StoreError)
+        expect((error as StoreError).code).toBe('NOT_FOUND')
+        expect((error as StoreError).message).toBe('片语不存在')
+      }
+    }
+  })
+
+  it('list 的 favorited 过滤只保留已收藏，可与 q、sort 叠加', () => {
+    let clock = NOW
+    const store = createPostStore({ seed: false, now: () => clock })
+    const older = store.create({ content: 'Reading 第一篇' })
+    clock = NOW + MINUTE
+    store.create({ content: '跑步五公里' })
+    clock = NOW + 2 * MINUTE
+    const newer = store.create({ content: 'reading 第二篇' })
+
+    store.toggleFavorite(older.id)
+    store.toggleFavorite(newer.id)
+    store.toggleLike(older.id)
+
+    expect(store.list({ favorited: true }).map((post) => post.id)).toEqual([newer.id, older.id])
+    expect(store.list({ favorited: false }).map((post) => post.content)).toEqual(['跑步五公里'])
+    expect(store.list({ favorited: true, q: 'READING' }).map((post) => post.id)).toEqual([
+      newer.id,
+      older.id,
+    ])
+    expect(store.list({ favorited: true, q: 'reading', sort: 'hot' }).map((post) => post.id)).toEqual(
+      [older.id, newer.id],
+    )
+    expect(store.list()).toHaveLength(3)
   })
 
   it('remove 返回布尔并真正移除', () => {
