@@ -8,6 +8,7 @@ const props = defineProps<{ post: Post }>()
 
 defineEmits<{
   like: []
+  favorite: []
   view: []
   copy: []
   tag: [tag: string]
@@ -43,7 +44,9 @@ const parts = computed(() => splitContent(props.post.content))
             · 来自广场
           </span>
         </div>
-        <span class="post__badge">{{ post.liked ? '已赞' : '片语' }}</span>
+        <span class="post__badge" :class="{ 'post__badge--fav': post.favorited }">
+          {{ post.favorited ? '已藏' : post.liked ? '已赞' : '片语' }}
+        </span>
       </div>
 
       <p class="post__body">
@@ -62,6 +65,16 @@ const parts = computed(() => splitContent(props.post.content))
             <path d="M12 20s-7-4.4-7-9.2A4.2 4.2 0 0 1 12 7.6a4.2 4.2 0 0 1 7 3.2C19 15.6 12 20 12 20Z" />
           </svg>
           <span>{{ post.likes }}</span>
+        </button>
+
+        <button type="button" class="fav-btn" :class="{ 'is-faved': post.favorited }"
+                data-action="favorite" :aria-pressed="post.favorited"
+                :aria-label="post.favorited ? '取消收藏' : '收藏'" @click="$emit('favorite')">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3.6l2.5 5.3 5.7.8-4.1 4 1 5.7-5.1-2.8-5.1 2.8 1-5.7-4.1-4 5.7-.8L12 3.6Z" />
+          </svg>
+          <span>{{ post.favorites }}</span>
         </button>
 
         <button type="button" class="ghost-btn" data-action="copy" @click="$emit('copy')">复制</button>

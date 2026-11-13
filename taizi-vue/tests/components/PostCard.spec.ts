@@ -10,6 +10,8 @@ function makePost(overrides: Partial<Post> = {}): Post {
     createdAt: Date.now() - 5 * 60_000,
     likes: 12,
     liked: false,
+    favorites: 3,
+    favorited: false,
     hue: 340,
     ...overrides,
   }
@@ -73,5 +75,39 @@ describe('PostCard：操作栏', () => {
     const wrapper = mountCard(makePost())
     await wrapper.find('.tag').trigger('click')
     expect(wrapper.emitted('tag')![0]).toEqual(['#今日片语'])
+  })
+})
+
+describe('PostCard：收藏', () => {
+  it('未收藏：显示收藏数，aria-pressed=false 且无高亮类', () => {
+    const wrapper = mountCard(makePost({ favorites: 5 }))
+    const fav = wrapper.find('[data-action="favorite"]')
+    expect(fav.text()).toBe('5')
+    expect(fav.attributes('aria-pressed')).toBe('false')
+    expect(fav.attributes('aria-label')).toBe('收藏')
+    expect(fav.classes()).not.toContain('is-faved')
+  })
+
+  it('已收藏：badge 变「已藏」并加琥珀类，按钮 is-faved', () => {
+    const wrapper = mountCard(makePost({ favorites: 6, favorited: true }))
+    expect(wrapper.find('.post__badge').text()).toBe('已藏')
+    expect(wrapper.find('.post__badge').classes()).toContain('post__badge--fav')
+    const fav = wrapper.find('[data-action="favorite"]')
+    expect(fav.attributes('aria-pressed')).toBe('true')
+    expect(fav.attributes('aria-label')).toBe('取消收藏')
+    expect(fav.classes()).toContain('is-faved')
+    expect(fav.find('span').text()).toBe('6')
+  })
+
+  it('收藏优先于点赞展示 badge', () => {
+    const wrapper = mountCard(makePost({ liked: true, favorited: true }))
+    expect(wrapper.find('.post__badge').text()).toBe('已藏')
+  })
+
+  it('点击收藏按钮发出 favorite 事件', async () => {
+    const wrapper = mountCard(makePost())
+    await wrapper.find('[data-action="favorite"]').trigger('click')
+    expect(wrapper.emitted('favorite')).toHaveLength(1)
+    expect(wrapper.emitted('like')).toBeUndefined()
   })
 })

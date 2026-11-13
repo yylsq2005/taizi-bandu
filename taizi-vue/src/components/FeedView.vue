@@ -25,6 +25,11 @@ const hasKeyword = computed(() => store.keyword !== '')
               role="tab" :aria-selected="store.filter === 'hot'" @click="store.setFilter('hot')">
         热门
       </button>
+      <button type="button" class="tab" :class="{ 'is-active': store.filter === 'favorites' }"
+              data-filter="favorites" role="tab" :aria-selected="store.filter === 'favorites'"
+              @click="store.setFilter('favorites')">
+        收藏
+      </button>
     </div>
     <span class="feedbar__count" aria-live="polite">{{ store.feedLabel }}</span>
   </div>
@@ -32,8 +37,8 @@ const hasKeyword = computed(() => store.keyword !== '')
   <section aria-label="片语时间线">
     <ul class="timeline" :hidden="store.visiblePosts.length === 0">
       <PostCard v-for="post in store.visiblePosts" :key="post.id" :post="post"
-                @like="store.toggleLike(post.id)" @view="emit('view', post.id)"
-                @copy="emit('copy', post.id)" @tag="emit('tag', $event)" />
+                @like="store.toggleLike(post.id)" @favorite="store.toggleFavorite(post.id)"
+                @view="emit('view', post.id)" @copy="emit('copy', post.id)" @tag="emit('tag', $event)" />
     </ul>
 
     <div class="empty" :hidden="store.visiblePosts.length > 0">

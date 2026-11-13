@@ -67,11 +67,6 @@ function scrollToComposer(): void {
   window.setTimeout(() => composerEl.value?.focusInput(), 260)
 }
 
-function focusSearch(): void {
-  searchEl.value?.focus()
-  searchEl.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-}
-
 function handlePublished(result: { ok: boolean; message?: string }): void {
   if (result.ok) {
     show('已发布，落在广场最上方啦')
@@ -101,6 +96,10 @@ async function handleConfirmDelete(): Promise<void> {
 
 function toggleViewingLike(): void {
   if (viewingId.value) void store.toggleLike(viewingId.value)
+}
+
+function toggleViewingFavorite(): void {
+  if (viewingId.value) void store.toggleFavorite(viewingId.value)
 }
 
 function copyViewing(): void {
@@ -239,13 +238,13 @@ onBeforeUnmount(() => {
         <path d="M12 5v14M5 12h14" />
       </svg>
     </button>
-    <button type="button" class="tabbar__item" data-nav="search" @click="focusSearch">
+    <button type="button" class="tabbar__item" :class="{ 'is-active': store.filter === 'favorites' }"
+            data-nav="favorites" @click="setFilterAndTop('favorites')">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9"
-           stroke-linecap="round" aria-hidden="true">
-        <circle cx="11" cy="11" r="6.4" />
-        <path d="M16 16l4 4" />
+           stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 3.6l2.5 5.3 5.7.8-4.1 4 1 5.7-5.1-2.8-5.1 2.8 1-5.7-4.1-4 5.7-.8L12 3.6Z" />
       </svg>
-      搜索
+      收藏
     </button>
     <button type="button" class="tabbar__item" data-nav="top" @click="scrollTop">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9"
@@ -257,7 +256,7 @@ onBeforeUnmount(() => {
   </nav>
 
   <DetailModal :post="detailPost" @close="viewingId = null" @like="toggleViewingLike"
-               @copy="copyViewing" @delete="requestDeleteViewing" />
+               @favorite="toggleViewingFavorite" @copy="copyViewing" @delete="requestDeleteViewing" />
 
   <ConfirmModal v-if="pendingDeleteId" @close="pendingDeleteId = null" @confirm="handleConfirmDelete" />
 
