@@ -2,7 +2,16 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { api, ApiError } from '../src/api/client'
 import type { Post } from '../src/types'
 
-const sample: Post = { id: 'p1', content: '你好', createdAt: 1, likes: 2, liked: false, hue: 340 }
+const sample: Post = {
+  id: 'p1',
+  content: '你好',
+  createdAt: 1,
+  likes: 2,
+  liked: false,
+  favorites: 1,
+  favorited: false,
+  hue: 340,
+}
 
 /** 造一个只实现客户端用到能力的 Response 替身 */
 function json(body: unknown, status = 200): Response {
@@ -77,6 +86,36 @@ describe('api：请求形状', () => {
     expect(url).toBe('/api/posts/p1')
     expect(init.method).toBe('PATCH')
     expect(init.body).toBe(JSON.stringify({ liked: true }))
+  })
+
+  it('likePost 用 POST 请求 /posts/:id/like 并携带显式 liked', async () => {
+    fetchMock.mockResolvedValue(json({ ...sample, liked: true, likes: 3 }))
+    await expect(api.likePost('p1', true)).resolves.toMatchObject({ liked: true, likes: 3 })
+    const { url, init } = call()
+    expect(url).toBe('/api/posts/p1/like')
+    expect(init.method).toBe('POST')
+    expect(init.body).toBe(JSON.stringify({ liked: true }))
+  })
+
+  it('likePost 省略参数时发送空对象，交给服务端切换', async () => {
+    fetchMock.mockResolvedValue(json({ ...sample, liked: true, likes: 3 }))
+    await api.likePost('p1')
+    expect(call().init.body).toBe('{}')
+  })
+
+  it('favoritePost 用 POST 请求 /posts/:id/favorite 并携带 favorited', async () => {
+    fetchMock.mockResolvedValue(json({ ...sample, favorited: true, favorites: 2 }))
+    await expect(api.favoritePost('p1', true)).resolves.toMatchObject({ favorited: true, favorites: 2 })
+    const { url, init } = call()
+    expect(url).toBe('/api/posts/p1/favorite')
+    expect(init.method).toBe('POST')
+    expect(init.body).toBe(JSON.stringify({ favorited: true }))
+  })
+
+  it('favoritePost 省略参数时用空对象切换', async () => {
+    fetchMock.mockResolvedValue(json(sample))
+    await api.favoritePost('p1')
+    expect(call().init.body).toBe('{}')
   })
 
   it('deletePost 用 DELETE，204 不解析 body', async () => {

@@ -71,10 +71,26 @@ export const api = {
     return request<Post>('/posts', { method: 'POST', body: JSON.stringify({ content }) })
   },
 
-  updatePost(id: string, patch: { content?: string; liked?: boolean }): Promise<Post> {
+  updatePost(id: string, patch: { content?: string; liked?: boolean; favorited?: boolean }): Promise<Post> {
     return request<Post>(`/posts/${encodeURIComponent(id)}`, {
       method: 'PATCH',
       body: JSON.stringify(patch),
+    })
+  },
+
+  /** 点赞：不传 liked 时为切换，传入则为显式设置（幂等） */
+  likePost(id: string, liked?: boolean): Promise<Post> {
+    return request<Post>(`/posts/${encodeURIComponent(id)}/like`, {
+      method: 'POST',
+      body: JSON.stringify(liked === undefined ? {} : { liked }),
+    })
+  },
+
+  /** 收藏：不传 favorited 时为切换，传入则为显式设置（幂等） */
+  favoritePost(id: string, favorited?: boolean): Promise<Post> {
+    return request<Post>(`/posts/${encodeURIComponent(id)}/favorite`, {
+      method: 'POST',
+      body: JSON.stringify(favorited === undefined ? {} : { favorited }),
     })
   },
 

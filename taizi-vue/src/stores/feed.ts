@@ -39,6 +39,10 @@ export const useFeedStore = defineStore('feed', () => {
       list = list.filter((post) => post.content.toLowerCase().includes(key))
     }
 
+    if (filter.value === 'favorites') {
+      list = list.filter((post) => post.favorited)
+    }
+
     if (filter.value === 'hot') {
       list.sort((a, b) => b.likes - a.likes || b.createdAt - a.createdAt)
     } else {
@@ -48,6 +52,9 @@ export const useFeedStore = defineStore('feed', () => {
   })
 
   const totalLikes = computed(() => posts.value.reduce((sum, post) => sum + post.likes, 0))
+
+  /** 我的收藏条数：用于左栏统计与移动端入口徽标 */
+  const favoriteCount = computed(() => posts.value.filter((post) => post.favorited).length)
 
   /** 热议榜：统计 #话题 条数，不足 5 条时用默认话题补齐 */
   const topics = computed<TopicEntry[]>(() => {
@@ -74,6 +81,7 @@ export const useFeedStore = defineStore('feed', () => {
     const count = visiblePosts.value.length
     if (keyword.value) return `找到 ${count} 条`
     if (filter.value === 'hot') return `热门 ${count} 条`
+    if (filter.value === 'favorites') return `收藏 ${count} 条`
     return `${posts.value.length} 条片语`
   })
 
@@ -118,6 +126,12 @@ export const useFeedStore = defineStore('feed', () => {
     }
   }
 
+  /** 用服务端返回的完整片语替换本地副本 */
+  function replacePost(updated: Post): void {
+    const index = posts.value.findIndex((item) => item.id === updated.id)
+    if (index >= 0) posts.value.splice(index, 1, updated)
+  }
+
   /** 点赞：先乐观更新，再用服务端结果校正，失败回滚 */
   async function toggleLike(id: string): Promise<void> {
     const post = posts.value.find((item) => item.id === id)
@@ -129,13 +143,29 @@ export const useFeedStore = defineStore('feed', () => {
     post.likes = Math.max(0, before.likes + (next ? 1 : -1))
 
     try {
-      const updated = await api.updatePost(id, { liked: next })
-      const index = posts.value.findIndex((item) => item.id === id)
-      if (index >= 0) posts.value.splice(index, 1, updated)
+      replacePost(await api.likePost(id, next))
       error.value = null
     } catch (err) {
-      const index = posts.value.findIndex((item) => item.id === id)
-      if (index >= 0) posts.value.splice(index, 1, { ...posts.value[index], ...before })
+      replacePost({ ...post, ...before })
+      error.value = errorText(err)
+    }
+  }
+
+  /** 收藏：与点赞同样的乐观更新策略，失败回滚 */
+  async function toggleFavorite(id: string): Promise<void> {
+    const post = posts.value.find((item) => item.id === id)
+    if (!post) return
+
+    const before = { favorited: post.favorited, favorites: post.favorites }
+    const next = !before.favorited
+    post.favorited = next
+    post.favorites = Math.max(0, before.favorites + (next ? 1 : -1))
+
+    try {
+      replacePost(await api.favoritePost(id, next))
+      error.value = null
+    } catch (err) {
+      replacePost({ ...post, ...before })
       error.value = errorText(err)
     }
   }
@@ -181,12 +211,14 @@ export const useFeedStore = defineStore('feed', () => {
     error,
     visiblePosts,
     totalLikes,
+    favoriteCount,
     topics,
     feedLabel,
     init,
     reload,
     publish,
     toggleLike,
+    toggleFavorite,
     removePost,
     setFilter,
     setKeyword,
