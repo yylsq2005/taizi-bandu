@@ -36,6 +36,8 @@ function fixture(id: string, overrides: Partial<Post> = {}): Post {
     createdAt: 100,
     likes: 0,
     liked: false,
+    favorites: 0,
+    favorited: false,
     hue: 340,
     ...overrides,
   }

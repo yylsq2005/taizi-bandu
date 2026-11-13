@@ -28,6 +28,8 @@ const SEEDS: Post[] = [
     createdAt: 300,
     likes: 12,
     liked: false,
+    favorites: 3,
+    favorited: false,
     hue: 340,
   },
   {
@@ -36,6 +38,8 @@ const SEEDS: Post[] = [
     createdAt: 200,
     likes: 8,
     liked: false,
+    favorites: 5,
+    favorited: false,
     hue: 158,
   },
   {
@@ -44,6 +48,8 @@ const SEEDS: Post[] = [
     createdAt: 100,
     likes: 21,
     liked: false,
+    favorites: 2,
+    favorited: false,
     hue: 205,
   },
 ]
