@@ -283,6 +283,9 @@
       list-style: none;
     }
 
+    /* 作者样式优先级高于 UA 的 [hidden]，需显式声明才生效 */
+    .timeline[hidden] { display: none; }
+
     /* ==================================================================
        8. 信息流卡片（Post）
        ================================================================== */
@@ -338,12 +341,6 @@
 
     .post:hover .post__delete,
     .post:focus-within .post__delete { opacity: 1; }
-
-    .post.is-leaving {
-      opacity: 0;
-      transform: translateY(-4px);
-      transition: opacity 200ms var(--ease), transform 200ms var(--ease);
-    }
 
     /* 通用图标按钮 */
     .icon-btn {
@@ -507,6 +504,131 @@
       font-size: 12px;
       color: var(--text-faint);
     }
+
+    /* ==================================================================
+       12. 悬停、入场与状态微动效
+       ================================================================== */
+    .post:hover,
+    .post:focus-within {
+      transform: translateY(-1px);
+      border-color: #DCE2F0;
+      box-shadow: var(--shadow-card-hover);
+    }
+
+    /* 离场态需压过 hover 的 transform，故写在 hover 之后 */
+    .post.is-leaving {
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 200ms var(--ease), transform 200ms var(--ease);
+    }
+
+    /* 新发布的卡片：淡入 + 轻微上移 */
+    .post.is-entering { animation: fadeSlideIn 320ms var(--ease) both; }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 发布按钮的加载指示 */
+    .btn__spinner {
+      display: none;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, .45);
+      border-top-color: #fff;
+      border-radius: 50%;
+    }
+
+    .btn.is-loading { pointer-events: none; }
+
+    .btn.is-loading .btn__spinner {
+      display: block;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* 字数超限时抖动一次，强化"无法发布"的反馈 */
+    .composer__counter.is-shake { animation: shake 320ms var(--ease); }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-3px); }
+      50% { transform: translateX(3px); }
+      75% { transform: translateX(-2px); }
+    }
+
+    /* ==================================================================
+       13. 轻提示（Toast）
+       ================================================================== */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      z-index: 90;
+      max-width: calc(100% - 32px);
+      padding: 10px 18px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      color: #fff;
+      background: rgba(15, 23, 42, .92);
+      box-shadow: 0 12px 30px -12px rgba(15, 23, 42, .6);
+      opacity: 0;
+      transform: translateX(-50%) translateY(10px);
+      transition: opacity var(--dur-base) var(--ease), transform var(--dur-base) var(--ease);
+      pointer-events: none;
+    }
+
+    .toast[hidden] { display: none; }
+
+    .toast.is-visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ==================================================================
+       14. 响应式：移动端收窄留白、按钮整行
+       ================================================================== */
+    @media (max-width: 639px) {
+      .app { padding: 20px 12px 36px; }
+
+      .brand { margin-bottom: 14px; }
+      .brand__title { font-size: 20px; }
+      .brand__logo { width: 38px; height: 38px; border-radius: 12px; }
+
+      .composer,
+      .post { padding: 14px; border-radius: 14px; }
+
+      .composer__footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .btn--primary { width: 100%; }
+
+      /* 触屏没有 hover，删除入口保持常显可点 */
+      .post__delete { opacity: .55; }
+
+      .empty { padding: 30px 18px 28px; border-radius: 14px; }
+    }
+
+    /* ==================================================================
+       15. 尊重系统「减少动态效果」偏好
+       ================================================================== */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
   </style>
 </head>
 
@@ -545,7 +667,10 @@
 
           <div class="composer__footer">
             <span class="composer__counter" id="char-counter" aria-live="polite">还可输入 140 字</span>
-            <button type="submit" class="btn btn--primary" id="publish-btn" disabled>发布</button>
+            <button type="submit" class="btn btn--primary" id="publish-btn" aria-busy="false" disabled>
+              <span class="btn__spinner" aria-hidden="true"></span>
+              <span id="publish-label">发布</span>
+            </button>
           </div>
         </form>
       </section>
@@ -610,6 +735,9 @@
     </div>
   </div>
 
+  <!-- 轻提示：用于本地存储不可用等降级场景 -->
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
   <script>
     (function () {
       'use strict';
@@ -621,17 +749,21 @@
       const STORAGE_VERSION = 1;
       const MAX_LENGTH = 140;                // 单条片语的字数上限
       const TIME_REFRESH_INTERVAL = 30 * 1000; // 相对时间的自动刷新间隔
+      const PUBLISH_DELAY = 420;             // 模拟提交耗时，让加载态可被感知
+      const WARN_THRESHOLD = 20;             // 剩余字数进入告警阈值
 
       const dom = {
         form: document.getElementById('composer-form'),
         input: document.getElementById('composer-input'),
         counter: document.getElementById('char-counter'),
         publishBtn: document.getElementById('publish-btn'),
+        publishLabel: document.getElementById('publish-label'),
         timeline: document.getElementById('timeline'),
         emptyState: document.getElementById('empty-state'),
         modal: document.getElementById('confirm-modal'),
         cancelDeleteBtn: document.getElementById('cancel-delete'),
         confirmDeleteBtn: document.getElementById('confirm-delete'),
+        toast: document.getElementById('toast'),
       };
 
       /* ================================================================
@@ -641,6 +773,10 @@
       let posts = [];
       let pendingDeleteId = null;    // 等待用户确认删除的帖子 id
       let lastFocusedElement = null; // 打开弹窗前的焦点元素，关闭后归位
+
+      let submitting = false;   // 发布请求进行中，用于防重复提交
+      let wasOverLimit = false; // 上一次输入是否已超限，用于触发抖动动画
+      let toastTimer = null;
 
       /* ================================================================
          三、存储层：与 localStorage 打交道，不触碰 DOM
@@ -824,7 +960,16 @@
 
       /** 增量渲染：新帖直接插到列表顶部，保留输入焦点且不重建整列表 */
       function prependPost(post) {
-        dom.timeline.prepend(createPostElement(post));
+        const element = createPostElement(post);
+        // 仅新插入的卡片播放入场动画，首屏渲染时不会集体闪动
+        element.classList.add('is-entering');
+        element.addEventListener(
+          'animationend',
+          () => element.classList.remove('is-entering'),
+          { once: true }
+        );
+
+        dom.timeline.prepend(element);
         syncEmptyState();
       }
 
@@ -869,43 +1014,90 @@
          六、交互层
          ================================================================ */
 
+      /** 输入框随内容自动增高（上限由 CSS max-height 兜住） */
+      function autoResizeInput() {
+        dom.input.style.height = 'auto';
+        dom.input.style.height = dom.input.scrollHeight + 'px';
+      }
+
       /** 根据当前输入同步「剩余字数 + 发布按钮可用状态」 */
       function updateComposerState() {
         const value = dom.input.value;
-        const used = countChars(value);
-        const remaining = MAX_LENGTH - used;
+        const remaining = MAX_LENGTH - countChars(value);
+        const isOver = remaining < 0;
 
-        dom.counter.textContent = remaining >= 0
-          ? '还可输入 ' + remaining + ' 字'
-          : '已超出 ' + Math.abs(remaining) + ' 字';
-        dom.counter.dataset.state = remaining < 0 ? 'over' : (remaining <= 20 ? 'warn' : 'normal');
+        dom.counter.textContent = isOver
+          ? '已超出 ' + Math.abs(remaining) + ' 字'
+          : '还可输入 ' + remaining + ' 字';
+        dom.counter.dataset.state = isOver ? 'over' : (remaining <= WARN_THRESHOLD ? 'warn' : 'normal');
 
-        // 空内容或超出上限时禁止发布
-        dom.publishBtn.disabled = remaining < 0 || value.trim() === '';
+        // 刚跨过上限时抖动一次，给出"发不出去"的即时反馈
+        if (isOver && !wasOverLimit) {
+          dom.counter.classList.remove('is-shake');
+          void dom.counter.offsetWidth; // 强制回流，让动画可重复触发
+          dom.counter.classList.add('is-shake');
+        }
+        wasOverLimit = isOver;
+
+        // 空内容、超出上限或正在提交时都禁止发布
+        dom.publishBtn.disabled = submitting || isOver || value.trim() === '';
+
+        autoResizeInput();
       }
 
-      /** 发布：校验 → 组装数据 → 落盘 → 渲染 → 复位输入框 */
+      /** 切换发布按钮的加载态（同时锁定输入框，避免提交中被改写） */
+      function setSubmitting(isSubmitting) {
+        submitting = isSubmitting;
+        dom.publishBtn.classList.toggle('is-loading', isSubmitting);
+        dom.publishBtn.setAttribute('aria-busy', String(isSubmitting));
+        dom.publishLabel.textContent = isSubmitting ? '发布中' : '发布';
+        dom.input.readOnly = isSubmitting;
+        updateComposerState();
+      }
+
+      /** 发布：校验 → 加载态 → 组装数据 → 落盘 → 渲染 → 复位输入框 */
       function handlePublish(event) {
         event.preventDefault();
+        if (submitting) return;
 
         const content = dom.input.value.trim();
         if (!content || countChars(content) > MAX_LENGTH) return;
 
-        const post = {
-          id: generateId(),
-          content,
-          createdAt: Date.now(),
-          author: { name: '我' },
-          stats: { likes: 0, replies: 0 },
-        };
+        setSubmitting(true);
 
-        posts.unshift(post);   // 新帖置于最前
-        savePosts();
-        prependPost(post);
+        window.setTimeout(() => {
+          const post = {
+            id: generateId(),
+            content,
+            createdAt: Date.now(),
+            author: { name: '我' },
+            stats: { likes: 0, replies: 0 },
+          };
 
-        dom.input.value = '';
-        updateComposerState();
-        dom.input.focus();
+          posts.unshift(post); // 新帖置于最前
+          if (!savePosts()) {
+            showToast('本地存储不可用，这条片语仅保留在当前页面');
+          }
+          prependPost(post);
+
+          dom.input.value = '';
+          setSubmitting(false);
+          dom.input.focus();
+        }, PUBLISH_DELAY);
+      }
+
+      /** 底部轻提示，2.6s 后自动消失 */
+      function showToast(message) {
+        dom.toast.textContent = message;
+        dom.toast.hidden = false;
+        void dom.toast.offsetWidth; // 确保过渡从初始态开始
+        dom.toast.classList.add('is-visible');
+
+        window.clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => {
+          dom.toast.classList.remove('is-visible');
+          window.setTimeout(() => { dom.toast.hidden = true; }, 240);
+        }, 2600);
       }
 
       /* ---------------- 删除：二次确认 ---------------- */
@@ -948,8 +1140,13 @@
         }
 
         posts = posts.filter((post) => post.id !== targetId);
-        savePosts();
+        if (!savePosts()) {
+          showToast('本地存储不可用，本次删除仅在当前页面生效');
+        }
         removePostElement(targetId);
+
+        // 触发删除的按钮即将被移除，焦点直接回到输入框而非归还给按钮
+        lastFocusedElement = null;
         closeConfirmDialog();
       }
 
@@ -975,6 +1172,19 @@
         if (event.key === 'Escape' && !dom.modal.hidden) closeConfirmDialog();
       }
 
+      /** 其他标签页改动数据时重新加载，避免多标签之间数据错乱 */
+      function handleStorageChange(event) {
+        if (event.key !== STORAGE_KEY) return;
+        posts = loadPosts();
+        renderTimeline();
+        syncEmptyState();
+      }
+
+      /** 从后台切回前台时立即校准相对时间 */
+      function handleVisibilityChange() {
+        if (document.visibilityState === 'visible') refreshTimes();
+      }
+
       /* ================================================================
          七、初始化
          ================================================================ */
@@ -992,6 +1202,9 @@
         dom.confirmDeleteBtn.addEventListener('click', confirmDelete);
         dom.modal.addEventListener('mousedown', handleModalPointerDown);
         document.addEventListener('keydown', handleGlobalKeydown);
+
+        window.addEventListener('storage', handleStorageChange);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
 
         window.setInterval(refreshTimes, TIME_REFRESH_INTERVAL);
       }
