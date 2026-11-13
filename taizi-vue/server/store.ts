@@ -10,6 +10,10 @@ export interface Post {
   createdAt: number
   likes: number
   liked: boolean
+  /** 累计收藏数 */
+  favorites: number
+  /** 当前用户是否已收藏 */
+  favorited: boolean
   hue: number
 }
 
@@ -18,6 +22,7 @@ export type SortMode = 'newest' | 'hot'
 export interface ListParams {
   sort?: SortMode
   q?: string
+  favorited?: boolean
 }
 
 export interface CreatePostInput {
@@ -27,6 +32,7 @@ export interface CreatePostInput {
 export interface UpdatePostPatch {
   content?: string
   liked?: boolean
+  favorited?: boolean
 }
 
 export type StoreErrorCode = 'VALIDATION_ERROR' | 'NOT_FOUND'
@@ -47,6 +53,10 @@ export interface PostStore {
   get(id: string): Post | undefined
   create(input: CreatePostInput): Post
   update(id: string, patch: UpdatePostPatch): Post
+  /** 不传第二参即切换；传了即为显式设置（幂等） */
+  toggleLike(id: string, liked?: boolean): Post
+  /** 不传第二参即切换；传了即为显式设置（幂等） */
+  toggleFavorite(id: string, favorited?: boolean): Post
   remove(id: string): boolean
   count(): number
 }
@@ -66,6 +76,8 @@ export function createSeedPosts(now: number = Date.now()): Post[] {
       createdAt: now - 12 * 60 * 1000,
       likes: 12,
       liked: false,
+      favorites: 5,
+      favorited: false,
       hue: 340,
     },
     {
@@ -75,6 +87,8 @@ export function createSeedPosts(now: number = Date.now()): Post[] {
       createdAt: now - 3 * 60 * 60 * 1000,
       likes: 8,
       liked: false,
+      favorites: 3,
+      favorited: false,
       hue: 158,
     },
     {
@@ -83,6 +97,8 @@ export function createSeedPosts(now: number = Date.now()): Post[] {
       createdAt: now - 26 * 60 * 60 * 1000,
       likes: 21,
       liked: false,
+      favorites: 9,
+      favorited: false,
       hue: 205,
     },
   ]
@@ -112,18 +128,50 @@ function normalizeContent(value: string): string {
   return content
 }
 
+/**
+ * 幂等地写入点赞/收藏标记：只有状态真正变化时才移动计数，且计数不小于 0。
+ * 这样重复点击同一状态不会反复加减。
+ */
+function setFlag(post: Post, target: 'liked' | 'favorited', next: boolean): void {
+  if (target === 'liked') {
+    if (post.liked === next) {
+      return
+    }
+    post.liked = next
+    post.likes = Math.max(0, post.likes + (next ? 1 : -1))
+    return
+  }
+  if (post.favorited === next) {
+    return
+  }
+  post.favorited = next
+  post.favorites = Math.max(0, post.favorites + (next ? 1 : -1))
+}
+
 /** 创建独立的内存仓储，每次调用互不影响 */
 export function createPostStore(options: StoreOptions = {}): PostStore {
   const { seed = true, now = () => Date.now(), generateId = () => crypto.randomUUID() } = options
   const posts: Post[] = seed ? createSeedPosts(now()) : []
 
+  function requirePost(id: string): Post {
+    const post = posts.find((item) => item.id === id)
+    if (!post) {
+      throw new StoreError('NOT_FOUND', '片语不存在')
+    }
+    return post
+  }
+
   return {
     list(params = {}) {
-      const { sort = 'newest', q = '' } = params
+      const { sort = 'newest', q = '', favorited } = params
       const keyword = q.toLowerCase()
-      const matched = keyword
-        ? posts.filter((post) => post.content.toLowerCase().includes(keyword))
-        : posts.slice()
+      // filter 会返回新数组，因此排序不会污染内部存储顺序
+      const matched = posts.filter((post) => {
+        if (favorited !== undefined && post.favorited !== favorited) {
+          return false
+        }
+        return !keyword || post.content.toLowerCase().includes(keyword)
+      })
       return matched.sort(sort === 'hot' ? byHot : byNewest)
     },
 
@@ -139,6 +187,8 @@ export function createPostStore(options: StoreOptions = {}): PostStore {
         createdAt: now(),
         likes: 0,
         liked: false,
+        favorites: 0,
+        favorited: false,
         // 按当前已有条数取色，保持「一条一色」的观感
         hue: PALETTE[posts.length % PALETTE.length],
       }
@@ -147,17 +197,28 @@ export function createPostStore(options: StoreOptions = {}): PostStore {
     },
 
     update(id, patch) {
-      const post = posts.find((item) => item.id === id)
-      if (!post) {
-        throw new StoreError('NOT_FOUND', '片语不存在')
-      }
+      const post = requirePost(id)
       if (patch.content !== undefined) {
         post.content = normalizeContent(patch.content)
       }
-      if (patch.liked !== undefined && patch.liked !== post.liked) {
-        post.liked = patch.liked
-        post.likes = Math.max(0, post.likes + (patch.liked ? 1 : -1))
+      if (patch.liked !== undefined) {
+        setFlag(post, 'liked', patch.liked)
       }
+      if (patch.favorited !== undefined) {
+        setFlag(post, 'favorited', patch.favorited)
+      }
+      return { ...post }
+    },
+
+    toggleLike(id, liked) {
+      const post = requirePost(id)
+      setFlag(post, 'liked', liked ?? !post.liked)
+      return { ...post }
+    },
+
+    toggleFavorite(id, favorited) {
+      const post = requirePost(id)
+      setFlag(post, 'favorited', favorited ?? !post.favorited)
       return { ...post }
     },
 

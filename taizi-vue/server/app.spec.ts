@@ -50,6 +50,21 @@ function patchJson(target: App, id: string, body: unknown): Promise<Response> {
   )
 }
 
+/** 点赞/收藏：body 传 undefined 时不带请求体，用于验证「空 body 即切换」 */
+function postAction(
+  target: App,
+  id: string,
+  action: 'like' | 'favorite',
+  body?: unknown,
+): Promise<Response> {
+  const init: RequestInit = { method: 'POST' }
+  if (body !== undefined) {
+    init.headers = { 'content-type': 'application/json' }
+    init.body = JSON.stringify(body)
+  }
+  return Promise.resolve(target.request(`/api/posts/${id}/${action}`, init))
+}
+
 let app: App
 let store: PostStore
 
@@ -121,6 +136,43 @@ describe('GET /api/posts', () => {
     const all = await readJson<{ posts: Post[] }>(await fixture.app.request('/api/posts?q='))
     expect(all.posts).toHaveLength(3)
   })
+
+  it('favorited=true 只返回已收藏，可与 sort、q 叠加', async () => {
+    const fixture = createFixture()
+    const older = await readJson<Post>(await postJson(fixture.app, { content: 'Reading 第一篇' }))
+    fixture.advance(MINUTE)
+    await postJson(fixture.app, { content: '跑步五公里' })
+    fixture.advance(MINUTE)
+    const newer = await readJson<Post>(await postJson(fixture.app, { content: 'reading 第二篇' }))
+
+    const none = await readJson<{ posts: Post[] }>(
+      await fixture.app.request('/api/posts?favorited=true'),
+    )
+    expect(none.posts).toEqual([])
+
+    await postAction(fixture.app, older.id, 'favorite')
+    await postAction(fixture.app, newer.id, 'favorite')
+
+    const faved = await readJson<{ posts: Post[] }>(
+      await fixture.app.request('/api/posts?favorited=true'),
+    )
+    expect(faved.posts.map((item) => item.id)).toEqual([newer.id, older.id])
+    expect(faved.posts.every((item) => item.favorited)).toBe(true)
+
+    const favedKeyword = await readJson<{ posts: Post[] }>(
+      await fixture.app.request('/api/posts?favorited=true&q=READING'),
+    )
+    expect(favedKeyword.posts.map((item) => item.id)).toEqual([newer.id, older.id])
+
+    await postAction(fixture.app, older.id, 'like', { liked: true })
+    const favedHot = await readJson<{ posts: Post[] }>(
+      await fixture.app.request('/api/posts?favorited=true&q=reading&sort=hot'),
+    )
+    expect(favedHot.posts.map((item) => item.id)).toEqual([older.id, newer.id])
+
+    const all = await readJson<{ posts: Post[] }>(await fixture.app.request('/api/posts'))
+    expect(all.posts).toHaveLength(3)
+  })
 })
 
 describe('POST /api/posts', () => {
@@ -136,6 +188,8 @@ describe('POST /api/posts', () => {
     expect(created.createdAt).toBe(NOW)
     expect(created.likes).toBe(0)
     expect(created.liked).toBe(false)
+    expect(created.favorites).toBe(0)
+    expect(created.favorited).toBe(false)
     expect(created.hue).toBe(340)
 
     const list = await readJson<{ posts: Post[] }>(await app.request('/api/posts'))
@@ -208,6 +262,25 @@ describe('PATCH /api/posts/:id', () => {
     expect((await readJson<Post>(await patchJson(app, created.id, { liked: false }))).likes).toBe(0)
   })
 
+  it('favorited true/false 联动收藏数，重复设置幂等且不影响点赞', async () => {
+    const created = await readJson<Post>(await postJson(app, { content: '收藏' }))
+
+    const faved = await readJson<Post>(await patchJson(app, created.id, { favorited: true }))
+    expect(faved.favorited).toBe(true)
+    expect(faved.favorites).toBe(1)
+    expect(faved.likes).toBe(0)
+    expect((await readJson<Post>(await patchJson(app, created.id, { favorited: true }))).favorites).toBe(
+      1,
+    )
+
+    const unfaved = await readJson<Post>(await patchJson(app, created.id, { favorited: false }))
+    expect(unfaved.favorited).toBe(false)
+    expect(unfaved.favorites).toBe(0)
+    expect(
+      (await readJson<Post>(await patchJson(app, created.id, { favorited: false }))).favorites,
+    ).toBe(0)
+  })
+
   it('content 更新成功，140 字边界可用且不动时间与配色', async () => {
     const created = await readJson<Post>(await postJson(app, { content: '旧内容' }))
     const updated = await readJson<Post>(
@@ -218,7 +291,7 @@ describe('PATCH /api/posts/:id', () => {
     expect(updated.hue).toBe(created.hue)
   })
 
-  it('超长、空字符串、空 body、非法 liked 都是 400', async () => {
+  it('超长、空字符串、空 body、非法 liked 或 favorited 都是 400', async () => {
     const created = await readJson<Post>(await postJson(app, { content: '校验' }))
 
     const tooLong = await patchJson(app, created.id, { content: '字'.repeat(MAX_LENGTH + 1) })
@@ -228,12 +301,128 @@ describe('PATCH /api/posts/:id', () => {
     expect((await patchJson(app, created.id, { content: '   ' })).status).toBe(400)
     expect((await patchJson(app, created.id, {})).status).toBe(400)
     expect((await patchJson(app, created.id, { liked: 'yes' })).status).toBe(400)
+    expect((await patchJson(app, created.id, { favorited: 1 })).status).toBe(400)
+    expect((await readJson<ApiError>(await patchJson(app, created.id, { favorited: null }))).error.message).toBe(
+      'favorited 必须是布尔值',
+    )
   })
 
   it('未知 id 返回 404', async () => {
     const res = await patchJson(app, 'missing', { liked: true })
     expect(res.status).toBe(404)
     expect((await readJson<ApiError>(res)).error.code).toBe('NOT_FOUND')
+  })
+})
+
+describe('POST /api/posts/:id/like', () => {
+  it('空 body 即切换，返回完整 Post', async () => {
+    const created = await readJson<Post>(await postJson(app, { content: '切换点赞' }))
+
+    const res = await postAction(app, created.id, 'like')
+    expect(res.status).toBe(200)
+    expect(res.headers.get('content-type')).toContain('application/json')
+    const liked = await readJson<Post>(res)
+    expect(liked.liked).toBe(true)
+    expect(liked.likes).toBe(1)
+    expect(liked.id).toBe(created.id)
+    expect(liked.content).toBe('切换点赞')
+    expect(liked.favorites).toBe(0)
+
+    const toggled = await readJson<Post>(await postAction(app, created.id, 'like'))
+    expect(toggled.liked).toBe(false)
+    expect(toggled.likes).toBe(0)
+  })
+
+  it('显式设置幂等，空对象 body 也能切换', async () => {
+    const created = await readJson<Post>(await postJson(app, { content: '显式点赞' }))
+
+    expect((await readJson<Post>(await postAction(app, created.id, 'like', { liked: true }))).likes).toBe(1)
+    expect((await readJson<Post>(await postAction(app, created.id, 'like', { liked: true }))).likes).toBe(1)
+
+    const emptyObject = await readJson<Post>(await postAction(app, created.id, 'like', {}))
+    expect(emptyObject.liked).toBe(false)
+    expect(emptyObject.likes).toBe(0)
+  })
+
+  it('liked 非布尔值返回 400 VALIDATION_ERROR', async () => {
+    const created = await readJson<Post>(await postJson(app, { content: '校验点赞' }))
+
+    for (const bad of [{ liked: 'yes' }, { liked: 1 }, { liked: null }]) {
+      const res = await postAction(app, created.id, 'like', bad)
+      expect(res.status).toBe(400)
+      const body = await readJson<ApiError>(res)
+      expect(body.error.code).toBe('VALIDATION_ERROR')
+      expect(body.error.message).toBe('liked 必须是布尔值')
+    }
+
+    const notObject = await postAction(app, created.id, 'like', [])
+    expect(notObject.status).toBe(400)
+    expect((await readJson<ApiError>(notObject)).error.code).toBe('VALIDATION_ERROR')
+  })
+
+  it('未知 id 返回 404 片语不存在', async () => {
+    const res = await postAction(app, 'missing', 'like')
+    expect(res.status).toBe(404)
+    const body = await readJson<ApiError>(res)
+    expect(body.error.code).toBe('NOT_FOUND')
+    expect(body.error.message).toBe('片语不存在')
+  })
+})
+
+describe('POST /api/posts/:id/favorite', () => {
+  it('空 body 即切换收藏，与点赞计数互不影响', async () => {
+    const created = await readJson<Post>(await postJson(app, { content: '切换收藏' }))
+
+    const res = await postAction(app, created.id, 'favorite')
+    expect(res.status).toBe(200)
+    const faved = await readJson<Post>(res)
+    expect(faved.favorited).toBe(true)
+    expect(faved.favorites).toBe(1)
+    expect(faved.likes).toBe(0)
+    expect(faved.liked).toBe(false)
+
+    await postAction(app, created.id, 'like')
+    const unFaved = await readJson<Post>(await postAction(app, created.id, 'favorite'))
+    expect(unFaved.favorited).toBe(false)
+    expect(unFaved.favorites).toBe(0)
+    expect(unFaved.likes).toBe(1)
+  })
+
+  it('显式设置幂等，重复点击不重复计数', async () => {
+    const created = await readJson<Post>(await postJson(app, { content: '显式收藏' }))
+
+    expect((await readJson<Post>(await postAction(app, created.id, 'favorite', { favorited: true }))).favorites).toBe(
+      1,
+    )
+    expect((await readJson<Post>(await postAction(app, created.id, 'favorite', { favorited: true }))).favorites).toBe(
+      1,
+    )
+    expect((await readJson<Post>(await postAction(app, created.id, 'favorite', { favorited: false }))).favorites).toBe(
+      0,
+    )
+    expect((await readJson<Post>(await postAction(app, created.id, 'favorite', { favorited: false }))).favorites).toBe(
+      0,
+    )
+  })
+
+  it('favorited 非布尔值返回 400 VALIDATION_ERROR', async () => {
+    const created = await readJson<Post>(await postJson(app, { content: '校验收藏' }))
+
+    for (const bad of [{ favorited: 'yes' }, { favorited: 0 }, { favorited: null }]) {
+      const res = await postAction(app, created.id, 'favorite', bad)
+      expect(res.status).toBe(400)
+      const body = await readJson<ApiError>(res)
+      expect(body.error.code).toBe('VALIDATION_ERROR')
+      expect(body.error.message).toBe('favorited 必须是布尔值')
+    }
+  })
+
+  it('未知 id 返回 404 片语不存在', async () => {
+    const res = await postAction(app, 'missing', 'favorite')
+    expect(res.status).toBe(404)
+    const body = await readJson<ApiError>(res)
+    expect(body.error.code).toBe('NOT_FOUND')
+    expect(body.error.message).toBe('片语不存在')
   })
 })
 
@@ -267,6 +456,8 @@ describe('createApp 默认仓储', () => {
     const seeded = createApp()
     const body = await readJson<{ posts: Post[] }>(await seeded.request('/api/posts'))
     expect(body.posts.map((item) => item.id)).toEqual(['seed-1', 'seed-2', 'seed-3'])
+    expect(body.posts.map((item) => item.favorites)).toEqual([5, 3, 9])
+    expect(body.posts.every((item) => item.favorited === false)).toBe(true)
     const health = await readJson<{ posts: number }>(await seeded.request('/api/health'))
     expect(health.posts).toBe(3)
   })
